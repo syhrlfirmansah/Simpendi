@@ -114,11 +114,11 @@
       </div>
     </div>
 
-   <!-- APLIKASI UTAMA -->
-      <div id="halamanAppContainer" class="flex flex-col h-full">
-        
-        <!-- Top Bar -->
-        <div class="bg-white/95 backdrop-blur-md px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30" style="padding-top: max(env(safe-area-inset-top), 16px);">
+    <!-- APLIKASI UTAMA -->
+    <div id="halamanAppContainer" class="flex flex-col h-full">
+      
+      <!-- Top Bar dengan Safe Area Notch -->
+      <div class="bg-white/95 backdrop-blur-md px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30" style="padding-top: max(env(safe-area-inset-top), 16px);">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
           <div>
@@ -443,7 +443,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT MENGGUNAKAN FETCH DENGAN HEADERS TEXT/PLAIN UNTUK MENGATASI CORS -->
+  <!-- JAVASCRIPT DENGAN FITUR OFFLINE-CACHING (LOCALSTORAGE) -->
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwKZIUR8-s_sS8TpIdKk-Zccofk4OUvo_feXEJnu0nHHY9ttSGNHbzBoTocZ1sGl54/exec";
 
@@ -462,6 +462,19 @@
     
     document.getElementById('tanggal').valueAsDate = new Date();
     document.getElementById("filterBulanRiwayat").value = new Date().getMonth() + 1;
+
+    // Cek apakah ada data tersimpan di HP (Offline Mode Ready)
+    window.addEventListener('DOMContentLoaded', () => {
+      const localCache = localStorage.getItem('simpendi_offline_cache');
+      if (localCache) {
+        try {
+          cachedAppData = JSON.parse(localCache);
+          document.getElementById("halamanLogin").style.display = "none";
+          document.getElementById("halamanAppContainer").style.display = "flex";
+          renderSemuaData();
+        } catch(e) { console.error("Gagal baca cache lokal"); }
+      }
+    });
 
     function formatRibuan(input) {
       let value = input.value.replace(/\D/g, '');
@@ -511,9 +524,18 @@
           }
       })
       .catch(err => {
-        console.error(err);
-        document.getElementById("pesanLogin").innerText = "Gagal terhubung ke server!";
-        btn.disabled = false; btn.innerText = "Masuk";
+        // Jika offline tapi sudah pernah login sebelumnya, izinkan masuk via Cache Lokal
+        if (user.toLowerCase() === "admin" && pass === "admin123" && localStorage.getItem('simpendi_offline_cache')) {
+          currentUser = "Admin";
+          document.getElementById("halamanLogin").style.display = "none";
+          document.getElementById("halamanAppContainer").style.display = "flex";
+          cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
+          renderSemuaData();
+        } else {
+          console.error(err);
+          document.getElementById("pesanLogin").innerText = "Gagal terhubung ke server / Offline!";
+          btn.disabled = false; btn.innerText = "Masuk";
+        }
       });
     }
 
@@ -522,11 +544,20 @@
         .then(res => res.json())
         .then(response => {
           cachedAppData = response;
+          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response)); // Simpan ke HP
           document.getElementById("halamanLogin").style.display = "none";
           document.getElementById("halamanAppContainer").style.display = "flex";
           renderSemuaData();
         })
-        .catch(err => console.error("Gagal ambil data:", err));
+        .catch(err => {
+          console.error("Gagal ambil data online, pakai cache:", err);
+          if (localStorage.getItem('simpendi_offline_cache')) {
+            cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
+            document.getElementById("halamanLogin").style.display = "none";
+            document.getElementById("halamanAppContainer").style.display = "flex";
+            renderSemuaData();
+          }
+        });
     }
 
     function muatDataDinamis() {
@@ -534,9 +565,16 @@
         .then(res => res.json())
         .then(response => {
           cachedAppData = response;
+          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response)); // Update cache HP
           renderSemuaData();
         })
-        .catch(err => console.error("Gagal muat data:", err));
+        .catch(err => {
+          console.error("Gagal muat data terbaru, menggunakan cache lokal:", err);
+          if(localStorage.getItem('simpendi_offline_cache')) {
+            cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
+            renderSemuaData();
+          }
+        });
     }
 
     function renderSemuaData() {
@@ -762,7 +800,7 @@
          })
          .catch(err => {
            console.error(err);
-           document.getElementById("pesanHapus").innerText = "Gagal menghapus";
+           document.getElementById("pesanHapus").innerText = "Gagal menghapus (Offline)";
          });
       }
     }
@@ -821,7 +859,7 @@
       })
       .catch(err => {
         console.error(err);
-        notif.innerHTML = `<span class="text-rose-500 font-bold">Gagal menyimpan!</span>`;
+        notif.innerHTML = `<span class="text-rose-500 font-bold">Gagal menyimpan (Offline)</span>`;
         btn.disabled = false; btn.innerHTML = "Simpan Transaksi";
       });
     }
@@ -907,7 +945,7 @@
       })
       .catch(err => {
         console.error(err);
-        notif.innerText = "Gagal menyimpan!";
+        notif.innerText = "Gagal menyimpan (Offline)";
       });
     }
 
