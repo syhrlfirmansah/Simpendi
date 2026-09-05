@@ -443,9 +443,8 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT MENGGUNAKAN FETCH KE GOOGLE APPS SCRIPT API -->
+  <!-- JAVASCRIPT MENGGUNAKAN FETCH DENGAN HEADERS TEXT/PLAIN UNTUK MENGATASI CORS -->
   <script>
-    // URL Web App Google Apps Script Anda yang sudah dimasukkan
     const API_URL = "https://script.google.com/macros/s/AKfycbyBtL7L3T0A9LJlupF1swV3bCMDvdRYoIz-SMiGIEiY7Ld2uhOBS1GpneOzXDIIKUUx/exec";
 
     let currentUser = "Admin";
@@ -490,7 +489,6 @@
       }
     }
 
-    // PROSES LOGIN DENGAN FETCH POST
     function prosesLogin() {
       const btn = document.getElementById("btnLogin");
       btn.disabled = true; btn.innerText = "Memuat...";
@@ -499,6 +497,7 @@
 
       fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "cekLogin", user: user, pass: pass })
       })
       .then(res => res.json())
@@ -752,6 +751,7 @@
          document.getElementById("pesanHapus").innerText = "Menghapus...";
          fetch(API_URL, {
            method: "POST",
+           headers: { "Content-Type": "text/plain;charset=utf-8" },
            body: JSON.stringify({ action: "hapusTransaksi", rowIndex: currentDetailItem.rowIndex })
          })
          .then(res => res.json())
@@ -808,6 +808,7 @@
 
       fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(dataBaru)
       })
       .then(res => res.json())
@@ -896,6 +897,7 @@
 
       fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       })
       .then(res => res.json())
