@@ -15,6 +15,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Chart.js untuk Grafik -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -169,6 +171,21 @@
               <p class="font-bold text-slate-800 text-sm mt-0.5"><span id="txtTerpakaiAnggaran">Rp 0</span> <span class="text-slate-400 font-normal">/</span> <span id="txtTotalLimitAnggaran" class="text-slate-600">Rp 0</span></p>
             </div>
             <button onclick="gantiTab('anggaran')" class="text-[#009666] text-xs font-bold hover:underline flex items-center gap-1">Detail <i class="bi bi-chevron-right text-xs"></i></button>
+          </div>
+
+          <!-- GRAFIK / VISUALISASI -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">Grafik Pengeluaran Kategori</h3>
+            <div class="relative w-full h-48">
+              <canvas id="pieChartKategori"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">Tren Pengeluaran Per Bulan</h3>
+            <div class="relative w-full h-48">
+              <canvas id="barChartBulanan"></canvas>
+            </div>
           </div>
 
           <div class="space-y-2.5 pt-1">
@@ -443,7 +460,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT DENGAN FITUR OFFLINE-CACHING (LOCALSTORAGE) -->
+  <!-- SCRIPT APLIKASI -->
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwKZIUR8-s_sS8TpIdKk-Zccofk4OUvo_feXEJnu0nHHY9ttSGNHbzBoTocZ1sGl54/exec";
 
@@ -454,6 +471,9 @@
     let currentDetailItem = null; 
     let currentDetailIndex = null;
     
+    let chartKategoriInstance = null;
+    let chartBulananInstance = null;
+    
     const formatRp = (angka) => {
       let isNegative = angka < 0;
       let absStr = Math.abs(angka).toLocaleString('id-ID');
@@ -463,7 +483,7 @@
     document.getElementById('tanggal').valueAsDate = new Date();
     document.getElementById("filterBulanRiwayat").value = new Date().getMonth() + 1;
 
-    // Cek apakah ada data tersimpan di HP (Offline Mode Ready)
+    // Muat data dari Cache Lokal jika ada (Mode Cepat / Offline)
     window.addEventListener('DOMContentLoaded', () => {
       const localCache = localStorage.getItem('simpendi_offline_cache');
       if (localCache) {
@@ -524,7 +544,6 @@
           }
       })
       .catch(err => {
-        // Jika offline tapi sudah pernah login sebelumnya, izinkan masuk via Cache Lokal
         if (user.toLowerCase() === "admin" && pass === "admin123" && localStorage.getItem('simpendi_offline_cache')) {
           currentUser = "Admin";
           document.getElementById("halamanLogin").style.display = "none";
@@ -533,7 +552,7 @@
           renderSemuaData();
         } else {
           console.error(err);
-          document.getElementById("pesanLogin").innerText = "Gagal terhubung ke server / Offline!";
+          document.getElementById("pesanLogin").innerText = "Gagal terhubung ke server!";
           btn.disabled = false; btn.innerText = "Masuk";
         }
       });
@@ -544,13 +563,12 @@
         .then(res => res.json())
         .then(response => {
           cachedAppData = response;
-          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response)); // Simpan ke HP
+          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response));
           document.getElementById("halamanLogin").style.display = "none";
           document.getElementById("halamanAppContainer").style.display = "flex";
           renderSemuaData();
         })
         .catch(err => {
-          console.error("Gagal ambil data online, pakai cache:", err);
           if (localStorage.getItem('simpendi_offline_cache')) {
             cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
             document.getElementById("halamanLogin").style.display = "none";
@@ -565,11 +583,10 @@
         .then(res => res.json())
         .then(response => {
           cachedAppData = response;
-          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response)); // Update cache HP
+          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response));
           renderSemuaData();
         })
         .catch(err => {
-          console.error("Gagal muat data terbaru, menggunakan cache lokal:", err);
           if(localStorage.getItem('simpendi_offline_cache')) {
             cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
             renderSemuaData();
@@ -600,6 +617,83 @@
 
       renderListAnggaranDanKategori();
       renderRiwayatLengkap();
+      renderGrafikAnalisis();
+    }
+
+    function renderGrafikAnalisis() {
+      if (!cachedAppData || !cachedAppData.dashboard.riwayat) return;
+      const riwayat = cachedAppData.dashboard.riwayat;
+
+      // 1. Pie Chart: Kategori Pengeluaran
+      let kategoriMap = {};
+      riwayat.forEach(item => {
+        if (item.jenis === "Pengeluaran") {
+          kategoriMap[item.kategori] = (kategoriMap[item.kategori] || 0) + item.jumlah;
+        }
+      });
+
+      const katLabels = Object.keys(kategoriMap);
+      const katValues = Object.values(kategoriMap);
+
+      const ctxPie = document.getElementById('pieChartKategori').getContext('2d');
+      if (chartKategoriInstance) chartKategoriInstance.destroy();
+
+      chartKategoriInstance = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+          labels: katLabels.length ? katLabels : ['Belum ada data'],
+          datasets: [{
+            data: katValues.length ? katValues : [1],
+            backgroundColor: ['#009666', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } }
+        }
+      });
+
+      // 2. Bar Chart: Pengeluaran Per Bulan
+      let bulanMap = { "Jan": 0, "Feb": 0, "Mar": 0, "Apr": 0, "Mei": 0, "Jun": 0, "Jul": 0, "Agt": 0, "Sep": 0, "Okt": 0, "Nov": 0, "Des": 0 };
+      let namaBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+
+      riwayat.forEach(item => {
+        if (item.jenis === "Pengeluaran" && item.tanggal) {
+          let parts = item.tanggal.split("/");
+          if (parts.length === 3) {
+            let bIdx = parseInt(parts[1], 10) - 1;
+            if (bIdx >= 0 && bIdx < 12) {
+              bulanMap[namaBulan[bIdx]] += item.jumlah;
+            }
+          }
+        }
+      });
+
+      const ctxBar = document.getElementById('barChartBulanan').getContext('2d');
+      if (chartBulananInstance) chartBulananInstance.destroy();
+
+      chartBulananInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: namaBulan,
+          datasets: [{
+            label: 'Pengeluaran (Rp)',
+            data: Object.values(bulanMap),
+            backgroundColor: '#009666',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { font: { size: 9 } }, grid: { display: false } },
+            x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+          }
+        }
+      });
     }
 
     function renderListAnggaranDanKategori() {
@@ -800,7 +894,7 @@
          })
          .catch(err => {
            console.error(err);
-           document.getElementById("pesanHapus").innerText = "Gagal menghapus (Offline)";
+           document.getElementById("pesanHapus").innerText = "Gagal menghapus";
          });
       }
     }
@@ -859,7 +953,7 @@
       })
       .catch(err => {
         console.error(err);
-        notif.innerHTML = `<span class="text-rose-500 font-bold">Gagal menyimpan (Offline)</span>`;
+        notif.innerHTML = `<span class="text-rose-500 font-bold">Gagal menyimpan!</span>`;
         btn.disabled = false; btn.innerHTML = "Simpan Transaksi";
       });
     }
@@ -945,7 +1039,7 @@
       })
       .catch(err => {
         console.error(err);
-        notif.innerText = "Gagal menyimpan (Offline)";
+        notif.innerText = "Gagal menyimpan!";
       });
     }
 
