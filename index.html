@@ -99,6 +99,9 @@
 
   <div class="app-container">
 
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none flex flex-col gap-2 w-max max-w-[90%]"></div>
+
     <!-- LOGIN -->
     <div id="halamanLogin">
       <div class="login-container">
@@ -340,7 +343,6 @@
             </div>
 
             <button type="submit" id="btnSimpan" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-4 rounded-xl shadow-sm text-sm mt-2">Simpan Transaksi</button>
-            <div id="pesanNotifikasi" class="text-center text-xs font-semibold h-4"></div>
           </form>
         </div>
       </div>
@@ -384,7 +386,6 @@
             <button onclick="prosesHapusTransaksi()" class="w-full py-4 rounded-xl text-rose-500 font-bold text-xs bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-all"><i class="bi bi-trash3 mr-1 text-sm"></i> Hapus</button>
             <button onclick="bukaEditTransaksi()" class="w-full py-4 rounded-xl text-[#009666] font-bold text-xs bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition-all"><i class="bi bi-pencil-square mr-1 text-sm"></i> Edit Data</button>
           </div>
-          <div id="pesanHapus" class="text-center text-xs font-semibold h-2 text-rose-500"></div>
         </div>
       </div>
 
@@ -431,7 +432,6 @@
             </div>
 
             <button type="submit" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-3.5 rounded-xl shadow-sm text-xs mt-2">Simpan Anggaran</button>
-            <div id="pesanAnggaranModal" class="text-center text-xs font-semibold h-4 text-emerald-600"></div>
           </form>
         </div>
       </div>
@@ -484,6 +484,32 @@
     document.getElementById('tanggal').valueAsDate = new Date();
     document.getElementById("filterBulanRiwayat").value = new Date().getMonth() + 1;
 
+    // Fungsi Modern Toast Notification
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let icon = type === 'success' ? 'bi-check-circle-fill text-[#009666]' : 'bi-exclamation-circle-fill text-rose-500';
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold bg-slate-900/95 text-white border border-slate-800 shadow-2xl backdrop-blur-md transition-all duration-300 translate-y-[-15px] opacity-0`;
+      toast.innerHTML = `<i class="bi ${icon} text-base"></i><span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-[-15px]', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      }, 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-15px]', 'opacity-0');
+        setTimeout(() => {
+          container.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+
     // Muat data dari Cache Lokal jika ada (Mode Cepat / Offline)
     window.addEventListener('DOMContentLoaded', () => {
       const localCache = localStorage.getItem('simpendi_offline_cache');
@@ -501,7 +527,7 @@
     function prosesLogout() {
       if (confirm("Keluar dan muat ulang data terbaru dari server?")) {
         localStorage.removeItem('simpendi_offline_cache');
-        location.reload(); // Refresh halaman total untuk membuang cache lama
+        location.reload(); 
       }
     }
 
@@ -548,7 +574,7 @@
             currentUser = nama;
             muatDataDinamisBerhasilLogin();
           } else {
-            document.getElementById("pesanLogin").innerText = "Username/password salah!";
+            showToast("Username atau kata sandi salah!", "error");
             btn.disabled = false; btn.innerText = "Masuk";
           }
       })
@@ -561,7 +587,7 @@
           renderSemuaData();
         } else {
           console.error(err);
-          document.getElementById("pesanLogin").innerText = "Gagal terhubung ke server!";
+          showToast("Gagal terhubung ke server!", "error");
           btn.disabled = false; btn.innerText = "Masuk";
         }
       });
@@ -812,7 +838,7 @@
 
     function prosesHapusTransaksi() {
       if(confirm("Yakin ingin menghapus transaksi ini?")) {
-         document.getElementById("pesanHapus").innerText = "Menghapus...";
+         showToast("Menghapus transaksi...", "success");
          fetch(API_URL, {
            method: "POST",
            headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -821,12 +847,12 @@
          .then(res => res.json())
          .then(() => {
             tutupDetailTransaksi();
-            document.getElementById("pesanHapus").innerText = "";
+            showToast("Transaksi berhasil dihapus!", "success");
             muatDataDinamis();
          })
          .catch(err => {
            console.error(err);
-           document.getElementById("pesanHapus").innerText = "Gagal menghapus";
+           showToast("Gagal menghapus transaksi!", "error");
          });
       }
     }
@@ -846,14 +872,16 @@
 
     function kirimData() {
       const btn = document.getElementById("btnSimpan");
-      const notif = document.getElementById("pesanNotifikasi");
       const isEdit = document.getElementById("editTransaksiIndex").value !== "";
       
       const jenisVal = document.querySelector('input[name="jenis"]:checked').value;
       const metodeVal = document.getElementById("metode").value;
       const kategoriInput = document.getElementById("kategori").value;
 
-      if(!kategoriInput) { alert("Pilih kategori terlebih dahulu!"); return; }
+      if(!kategoriInput) { 
+        showToast("Pilih kategori terlebih dahulu!", "error"); 
+        return; 
+      }
 
       btn.disabled = true; btn.innerHTML = 'Memproses...';
       let jumlahBersih = document.getElementById("jumlah").value.replace(/\./g, '');
@@ -877,16 +905,17 @@
       })
       .then(res => res.json())
       .then(() => {
-         notif.innerHTML = `<span class="text-emerald-600 font-bold">${isEdit ? 'Berhasil diperbarui!' : 'Berhasil dicatat!'}</span>`;
+         showToast(isEdit ? 'Transaksi berhasil diperbarui!' : 'Transaksi berhasil dicatat!', 'success');
          document.getElementById("keterangan").value = "";
          document.getElementById("jumlah").value = "";
          btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
-         setTimeout(() => { notif.innerHTML = ""; tutupModalTransaksi(); muatDataDinamis(); }, 1000);
+         tutupModalTransaksi(); 
+         muatDataDinamis();
       })
       .catch(err => {
         console.error(err);
-        notif.innerHTML = `<span class="text-rose-500 font-bold">Gagal menyimpan!</span>`;
-        btn.disabled = false; btn.innerHTML = "Simpan Transaksi";
+        showToast("Gagal menyimpan transaksi!", "error");
+        btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
       });
     }
 
@@ -946,7 +975,6 @@
       const kantongUang = document.getElementById("inputKantongUang").value;
       let kategoriBaru = `${kategoriKat} (${kantongUang})`;
       let limitBersih = document.getElementById("inputLimitBaru").value.replace(/\./g, '');
-      const notif = document.getElementById("pesanAnggaranModal");
       
       const actionType = rowIndex === "" ? "simpanAnggaranBaru" : "updateAnggaran";
       const payload = {
@@ -966,12 +994,13 @@
       })
       .then(res => res.json())
       .then(() => {
-        notif.innerText = "Berhasil!";
-        setTimeout(() => { tutupModalAnggaran(); muatDataDinamis(); notif.innerText = ""; }, 800);
+        showToast("Anggaran berhasil disimpan!", "success");
+        tutupModalAnggaran(); 
+        muatDataDinamis();
       })
       .catch(err => {
         console.error(err);
-        notif.innerText = "Gagal menyimpan!";
+        showToast("Gagal menyimpan anggaran!", "error");
       });
     }
 
