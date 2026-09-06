@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#009666">
+  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Simpendi">
+  <link rel="apple-touch-icon" href="icon-192.png">
   
   <title>Simpendi</title>
   
@@ -452,6 +457,15 @@
 
   <!-- SCRIPT APLIKASI -->
   <script>
+    // Pendaftaran Service Worker untuk PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('ServiceWorker registered scope:', reg.scope))
+          .catch(err => console.log('ServiceWorker registration failed:', err));
+      });
+    }
+
     const API_URL = "https://script.google.com/macros/s/AKfycbwKZIUR8-s_sS8TpIdKk-Zccofk4OUvo_feXEJnu0nHHY9ttSGNHbzBoTocZ1sGl54/exec";
 
     let currentUser = "Admin";
