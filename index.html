@@ -473,7 +473,7 @@
   <!-- FIREBASE SDK & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
@@ -488,7 +488,7 @@
     const db = getFirestore(app);
 
     window.db = db;
-    window.dbOperations = { collection, addDoc, getDocs, onSnapshot, deleteDoc, doc, updateDoc };
+    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc };
 
     let currentUser = "Admin";
     let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
@@ -542,7 +542,7 @@
         currentUser = user;
         document.getElementById("halamanLogin").style.display = "none";
         document.getElementById("halamanAppContainer").style.display = "flex";
-        initFirebaseListeners();
+        loadData(); // Memuat data sekali ambil (getDocs)
         showToast("Berhasil masuk ke aplikasi!", "success");
       } else {
         document.getElementById("pesanLogin").innerText = "Masukkan username & password!";
@@ -555,22 +555,26 @@
       }
     }
 
-    function initFirebaseListeners() {
-      onSnapshot(collection(db, "transaksi"), (snapshot) => {
+    // Fungsi Pengambilan Data Sekali Jalan (getDocs) untuk Optimasi Kuota
+    async function loadData() {
+      try {
+        const snapshotTransaksi = await getDocs(collection(db, "transaksi"));
         allTransactions = [];
-        snapshot.forEach((docItem) => {
+        snapshotTransaksi.forEach((docItem) => {
           allTransactions.push({ id: docItem.id, ...docItem.data() });
         });
-        recalculateAndRender();
-      });
 
-      onSnapshot(collection(db, "anggaran"), (snapshot) => {
+        const snapshotAnggaran = await getDocs(collection(db, "anggaran"));
         allBudgets = [];
-        snapshot.forEach((docItem) => {
+        snapshotAnggaran.forEach((docItem) => {
           allBudgets.push({ id: docItem.id, ...docItem.data() });
         });
+
         recalculateAndRender();
-      });
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+        showToast("Gagal memuat data dari database", "error");
+      }
     }
 
     function recalculateAndRender() {
@@ -999,6 +1003,7 @@
          try {
            await deleteDoc(doc(db, "transaksi", currentDetailItem.id));
            tutupDetailTransaksi();
+           loadData(); // Muat ulang data setelah hapus
            showToast("Transaksi berhasil dihapus!", "success");
          } catch(err) {
            console.error(err);
@@ -1064,6 +1069,7 @@
         document.getElementById("jumlah").value = "";
         btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
         tutupModalTransaksi();
+        loadData(); // Muat ulang data setelah tambah/edit
       } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan transaksi!", "error");
@@ -1148,6 +1154,7 @@
         }
         showToast("Anggaran berhasil disimpan!", "success");
         tutupModalAnggaran();
+        loadData(); // Muat ulang data setelah simpan anggaran
       } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan anggaran!", "error");
