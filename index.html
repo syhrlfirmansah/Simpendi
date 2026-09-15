@@ -205,20 +205,10 @@
                 <h3 class="font-bold text-slate-800 text-base">Anggaran Bulanan</h3>
                 <p class="text-xs text-slate-400">Atur & pantau anggaran tiap bulan.</p>
               </div>
-              <select id="filterBulanAnggaran" onchange="window.recalculateAndRender()" class="bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:border-[#009666] shadow-sm">
-                <option value="2026-01">Januari 2026</option>
-                <option value="2026-02">Februari 2026</option>
-                <option value="2026-03">Maret 2026</option>
-                <option value="2026-04">April 2026</option>
-                <option value="2026-05">Mei 2026</option>
-                <option value="2026-06">Juni 2026</option>
-                <option value="2026-07">Juli 2026</option>
-                <option value="2026-08">Agustus 2026</option>
-                <option value="2026-09" selected>September 2026</option>
-                <option value="2026-10">Oktober 2026</option>
-                <option value="2026-11">November 2026</option>
-                <option value="2026-12">Desember 2026</option>
-              </select>
+              <button onclick="bukaModalFilterBulanAnggaran()" class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                <i class="bi bi-calendar-event text-[#009666] text-sm"></i>
+                <span id="labelTombolFilterBulanAnggaran">September 2026</span>
+              </button>
             </div>
             
             <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center justify-between">
@@ -260,7 +250,7 @@
 
       </div>
 
-      <!-- MODAL KALENDER POP-UP -->
+      <!-- MODAL KALENDER RIWAYAT -->
       <div id="modalKalender" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
@@ -286,6 +276,28 @@
 
           <div class="pt-2 border-t border-slate-100 flex gap-2">
             <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Semua Bulan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL FILTER BULAN ANGGARAN -->
+      <div id="modalFilterBulanAnggaran" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <h3 class="font-bold text-slate-800 text-sm">Pilih Bulan Anggaran</h3>
+            <button onclick="tutupModalFilterBulanAnggaran()" class="text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center px-1">
+              <button onclick="ubahTahunAnggaranModal(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
+              <span id="labelTahunAnggaranModal" class="font-bold text-slate-800 text-sm">2026</span>
+              <button onclick="ubahTahunAnggaranModal(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            
+            <div id="gridBulanAnggaran" class="grid grid-cols-3 gap-2 text-xs font-semibold">
+              <!-- Diisi via JavaScript -->
+            </div>
           </div>
         </div>
       </div>
@@ -488,7 +500,11 @@
     // State Kalender Riwayat
     let kalenderTahun = 2026;
     let kalenderBulan = 8; // September (0-index)
-    let selectedTanggalFilter = null; // format 'YYYY-MM-DD' atau null
+    let selectedTanggalFilter = null;
+
+    // State Filter Bulan Anggaran
+    let selectedBudgetYear = 2026;
+    let selectedBudgetMonthIndex = 8; // September (0-index)
 
     const formatRp = (angka) => {
       let isNegative = angka < 0;
@@ -585,7 +601,8 @@
         return { ...item, tanggalFormatted: displayDate, _localIdx: idx };
       });
 
-      const selectedBudgetMonth = document.getElementById("filterBulanAnggaran") ? document.getElementById("filterBulanAnggaran").value : currentYearMonth;
+      const mmBudget = String(selectedBudgetMonthIndex + 1).padStart(2, '0');
+      const selectedBudgetMonth = `${selectedBudgetYear}-${mmBudget}`;
 
       let filteredBudgets = allBudgets.filter(b => {
         if (!b.bulan) {
@@ -635,7 +652,7 @@
       renderRiwayatLengkap();
     }
 
-    // Modal Kalender Pop-up Control
+    // Modal Kalender Riwayat Control
     window.bukaModalKalender = function() {
       document.getElementById("modalKalender").classList.remove("hidden");
       renderKalender();
@@ -688,7 +705,7 @@
       const grid = document.getElementById("gridKalender");
       grid.innerHTML = "";
 
-      const firstDayIndex = (new Date(kalenderTahun, kalenderBulan, 1).getDay() + 6) % 7; // Senin = 0
+      const firstDayIndex = (new Date(kalenderTahun, kalenderBulan, 1).getDay() + 6) % 7;
       const totalDays = new Date(kalenderTahun, kalenderBulan + 1, 0).getDate();
 
       for (let i = 0; i < firstDayIndex; i++) {
@@ -727,6 +744,53 @@
           </div>
         `;
       }
+    }
+
+    // Modal Filter Bulan Anggaran Control
+    window.bukaModalFilterBulanAnggaran = function() {
+      document.getElementById("modalFilterBulanAnggaran").classList.remove("hidden");
+      renderModalBulanAnggaranGrid();
+    }
+
+    window.tutupModalFilterBulanAnggaran = function() {
+      document.getElementById("modalFilterBulanAnggaran").classList.add("hidden");
+    }
+
+    window.ubahTahunAnggaranModal = function(delta) {
+      selectedBudgetYear += delta;
+      renderModalBulanAnggaranGrid();
+    }
+
+    window.pilihBulanAnggaranModal = function(mIndex) {
+      selectedBudgetMonthIndex = mIndex;
+      tutupModalFilterBulanAnggaran();
+      
+      const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulan[selectedBudgetMonthIndex]} ${selectedBudgetYear}`;
+      
+      recalculateAndRender();
+    }
+
+    function renderModalBulanAnggaranGrid() {
+      document.getElementById("labelTahunAnggaranModal").innerText = selectedBudgetYear;
+      const grid = document.getElementById("gridBulanAnggaran");
+      grid.innerHTML = "";
+
+      const namaBulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+      namaBulanSingkat.forEach((bName, idx) => {
+        const isSelected = (idx === selectedBudgetMonthIndex);
+        let btnClass = "bg-slate-50 hover:bg-slate-100 text-slate-700 py-3 rounded-xl transition-all border border-slate-100";
+        if (isSelected) {
+          btnClass = "bg-[#009666] text-white font-bold py-3 rounded-xl shadow-sm transition-all";
+        }
+
+        grid.innerHTML += `
+          <button onclick="pilihBulanAnggaranModal(${idx})" class="${btnClass}">
+            ${bName}
+          </button>
+        `;
+      });
     }
 
     window.renderListAnggaranDanKategori = function() {
@@ -1063,7 +1127,9 @@
       const kantongUang = document.getElementById("inputKantongUang").value;
       let kategoriBaru = `${kategoriKat} (${kantongUang})`;
       let limitBersih = document.getElementById("inputLimitBaru").value.replace(/\./g, '');
-      const activeMonth = document.getElementById("filterBulanAnggaran").value;
+      
+      const mmBudget = String(selectedBudgetMonthIndex + 1).padStart(2, '0');
+      const activeMonth = `${selectedBudgetYear}-${mmBudget}`;
       
       try {
         if(docId) {
