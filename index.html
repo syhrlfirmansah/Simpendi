@@ -6,11 +6,10 @@
   
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#009666">
-  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Simpendi">
-  <link rel="apple-touch-icon" href="icon-192.png">
   
   <title>Simpendi</title>
   
@@ -23,46 +22,13 @@
   
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    
-    body, html { 
-      margin: 0; padding: 0; 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background-color: #ffffff; 
-      color: #0f172a; 
-      width: 100%; height: 100%; 
-      overflow: hidden; 
-    }
-    
-    .app-container {
-      width: 100%; height: 100%;
-      max-width: 100%; margin: 0;
-      background: #ffffff;
-      display: flex; flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      border-radius: 0;
-      box-shadow: none;
-    }
-
+    body, html { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #0f172a; width: 100%; height: 100%; overflow: hidden; }
+    .app-container { width: 100%; height: 100%; max-width: 100%; margin: 0; background: #ffffff; display: flex; flex-direction: column; position: relative; overflow: hidden; }
     @media (min-width: 768px) {
-      body { 
-        background-color: #0f172a; 
-        display: flex; justify-content: center; align-items: center; 
-      }
-      .app-container { 
-        max-width: 420px !important; 
-        height: 90vh !important; 
-        max-height: 850px; 
-        border-radius: 32px !important; 
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        border: 6px solid #1e293b; 
-      }
+      body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; }
+      .app-container { max-width: 420px !important; height: 90vh !important; max-height: 850px; border-radius: 32px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 6px solid #1e293b; }
     }
-    
-    #halamanLogin { 
-      display: flex; justify-content: center; align-items: center; 
-      width: 100%; height: 100%; background-color: #ffffff; position: absolute; z-index: 60; 
-    }
+    #halamanLogin { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #ffffff; position: absolute; z-index: 60; }
     .login-container { width: 100%; padding: 32px; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
     .logo-group { display: flex; align-items: center; margin-bottom: 32px; }
     .logo-icon { background: #009666; color: #ffffff; font-weight: 700; font-size: 1.2em; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 14px; margin-right: 14px; }
@@ -73,21 +39,10 @@
     .login-form input { padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95em; outline: none; background: #f8fafc; color: #1e293b; }
     .login-form input:focus { border-color: #009666; background: #ffffff; }
     .login-form button { padding: 14px; background: #009666; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95em; font-weight: 600; cursor: pointer; }
-
     #halamanAppContainer { display: none; width: 100%; height: 100%; background-color: #ffffff; flex-direction: column; position: relative; }
     .app-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 120px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-    
-    .bottom-nav { 
-      position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); 
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid #f1f5f9;
-      display: flex; justify-content: space-around; align-items: center; 
-      padding: 10px 0 24px 0; height: 75px; z-index: 50; 
-    }
-    .nav-item { 
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #94a3b8; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.33%;
-    }
+    .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #f1f5f9; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 24px 0; height: 75px; z-index: 50; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.33%; }
     .nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
     .nav-item.active { color: #009666; }
     .tab-pane { animation: fadeIn 0.2s ease-out forwards; }
@@ -149,6 +104,20 @@
         
         <!-- BERANDA -->
         <div id="tab-beranda" class="tab-pane space-y-4">
+          
+          <!-- TOMBOL MIGRASI / IMPOR DATA LAMA (MUNCUL JIKA INGIN DIMASUKKAN) -->
+          <div id="bannerMigrasi" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2.5 shadow-sm">
+            <div class="flex items-center gap-2 text-[#009666] font-bold text-xs">
+              <i class="bi bi-cloud-arrow-down-fill text-base"></i>
+              <span>Impor Data Spreadsheet Lama</span>
+            </div>
+            <p class="text-slate-600 text-[11px] leading-relaxed">Klik tombol di bawah ini untuk memasukkan 26 riwayat transaksi lama Anda ke Firebase Firestore secara otomatis.</p>
+            <button onclick="imporDataLamaUI()" id="btnImporUI" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-3 rounded-xl text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
+              <i class="bi bi-arrow-down-circle text-sm"></i>
+              <span>Impor 26 Data Transaksi Lama</span>
+            </button>
+          </div>
+
           <div class="bg-gradient-to-br from-[#009666] to-[#007d55] text-white rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="absolute -right-4 -bottom-4 w-28 h-28 bg-white/10 rounded-full blur-lg pointer-events-none"></div>
             <div class="flex items-center justify-between text-emerald-100 text-xs font-medium">
@@ -470,7 +439,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Global variables
     window.db = db;
     window.dbOperations = { collection, addDoc, getDocs, onSnapshot, deleteDoc, doc, updateDoc };
 
@@ -478,8 +446,6 @@
     let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
     let currentFilterJenis = "Semua";
     let dataRiwayatLengkap = []; 
-    let currentDetailItem = null; 
-    let currentDetailIndex = null;
     let allTransactions = [];
     let allBudgets = [];
 
@@ -492,7 +458,6 @@
     document.getElementById('tanggal').valueAsDate = new Date();
     document.getElementById("filterBulanRiwayat").value = new Date().getMonth() + 1;
 
-    // Toast Notification
     window.showToast = function(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -512,13 +477,6 @@
         toast.classList.add('translate-y-[-15px]', 'opacity-0');
         setTimeout(() => { container.removeChild(toast); }, 300);
       }, 3000);
-    }
-
-    // Service Worker PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
-      });
     }
 
     window.prosesLogin = function() {
@@ -541,18 +499,24 @@
       }
     }
 
-    // Realtime Sync with Firebase Firestore
     function initFirebaseListeners() {
-      // Listen to Transactions
       onSnapshot(collection(db, "transaksi"), (snapshot) => {
         allTransactions = [];
         snapshot.forEach((docItem) => {
           allTransactions.push({ id: docItem.id, ...docItem.data() });
         });
+        
+        // Tampilkan banner migrasi jika data transaksi masih kosong
+        const banner = document.getElementById("bannerMigrasi");
+        if(allTransactions.length === 0) {
+          if(banner) banner.classList.remove("hidden");
+        } else {
+          if(banner) banner.classList.add("hidden");
+        }
+
         recalculateAndRender();
       });
 
-      // Listen to Budgets
       onSnapshot(collection(db, "anggaran"), (snapshot) => {
         allBudgets = [];
         snapshot.forEach((docItem) => {
@@ -562,6 +526,63 @@
       });
     }
 
+    // FUNGSI UTAMA UNTUK TOMBOL IMPOR OTOMATIS DI UI
+    window.imporDataLamaUI = async function() {
+      const btn = document.getElementById("btnImporUI");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-sm"></i><span>Sedang Mengimpor 26 Data...</span>`;
+
+      const dataTransaksiCSV = [
+        { "user": "Admin", "tanggal": "2026-09-01", "jenis": "Pemasukan", "kategori": "Gaji", "metode": "QRIS", "jumlah": 1350000, "keterangan": "Anggaran bulan september" },
+        { "user": "Admin", "tanggal": "2026-09-02", "jenis": "Pengeluaran", "kategori": "Vitamin (Bank Jago)", "metode": "QRIS", "jumlah": 100000, "keterangan": "HUTANG 300.000 Bayar tiap bulan selama 3 bulan ke depan" },
+        { "user": "Admin", "tanggal": "2026-09-02", "jenis": "Pengeluaran", "kategori": "Bensin (Bank Jago)", "metode": "QRIS", "jumlah": 30000, "keterangan": "" },
+        { "user": "Admin", "tanggal": "2026-09-03", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 4500, "keterangan": "Beli Tolak Angin" },
+        { "user": "Admin", "tanggal": "2026-09-03", "jenis": "Pengeluaran", "kategori": "Kuota (Bank Jago)", "metode": "QRIS", "jumlah": 60000, "keterangan": "" },
+        { "user": "Admin", "tanggal": "2026-09-03", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 40000, "keterangan": "40000" },
+        { "user": "Admin", "tanggal": "2026-09-04", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 65000, "keterangan": "Disney+ otomatis" },
+        { "user": "Admin", "tanggal": "2026-09-05", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "Tunai", "jumlah": 8000, "keterangan": "Beli adem sari" },
+        { "user": "Admin", "tanggal": "2026-09-05", "jenis": "Pemasukan", "kategori": "Hasil Usaha", "metode": "QRIS", "jumlah": 80000, "keterangan": "Untung Morling" },
+        { "user": "Admin", "tanggal": "2026-09-05", "jenis": "Pengeluaran", "kategori": "Transportasi (Bank Jago)", "metode": "QRIS", "jumlah": 90000, "keterangan": "Service motor" },
+        { "user": "Admin", "tanggal": "2026-09-05", "jenis": "Pengeluaran", "kategori": "Dana darurat (Bank Jago)", "metode": "QRIS", "jumlah": 110000, "keterangan": "Service motor" },
+        { "user": "Admin", "tanggal": "2026-09-06", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 37500, "keterangan": "Beli masker" },
+        { "user": "Admin", "tanggal": "2026-09-08", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 16000, "keterangan": "Kebab" },
+        { "user": "Admin", "tanggal": "2026-09-08", "jenis": "Pengeluaran", "kategori": "Bensin (Bank Jago)", "metode": "QRIS", "jumlah": 25000, "keterangan": "" },
+        { "user": "Admin", "tanggal": "2026-09-09", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 16000, "keterangan": "Beli vitamin B & C" },
+        { "user": "Admin", "tanggal": "2026-09-11", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 60000, "keterangan": "Beli morling" },
+        { "user": "Admin", "tanggal": "2026-09-11", "jenis": "Pengeluaran", "kategori": "Bensin (Bank Jago)", "metode": "Tunai", "jumlah": 25000, "keterangan": "" },
+        { "user": "Admin", "tanggal": "2026-09-11", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 30000, "keterangan": "Beli coklat" },
+        { "user": "Admin", "tanggal": "2026-09-11", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 9000, "keterangan": "Kuota axis" },
+        { "user": "Admin", "tanggal": "2026-09-13", "jenis": "Pengeluaran", "kategori": "Bensin (Bank Jago)", "metode": "Tunai", "jumlah": 35000, "keterangan": "Pertamax di tasik" },
+        { "user": "Admin", "tanggal": "2026-09-13", "jenis": "Pengeluaran", "kategori": "Dana darurat (Bank Jago)", "metode": "QRIS", "jumlah": 40000, "keterangan": "DODOL KACANG DI GARUT" },
+        { "user": "Admin", "tanggal": "2026-09-13", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 15000, "keterangan": "Aer" },
+        { "user": "Admin", "tanggal": "2026-09-14", "jenis": "Pengeluaran", "kategori": "Bensin (Bank Jago)", "metode": "Tunai", "jumlah": 20000, "keterangan": "" },
+        { "user": "Admin", "tanggal": "2026-09-11", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 20000, "keterangan": "Beli kopi kenangan" },
+        { "user": "Admin", "tanggal": "2026-09-15", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 7000, "keterangan": "kopii" },
+        { "user": "Admin", "tanggal": "2026-09-15", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 7500, "keterangan": "Beli tali buat topi" }
+      ];
+
+      try {
+        for (let item of dataTransaksiCSV) {
+          await addDoc(collection(db, "transaksi"), {
+            user: item.user || "Admin",
+            jenis: item.jenis,
+            jumlah: Number(item.jumlah),
+            kategori: item.kategori,
+            tanggal: item.tanggal,
+            metode: item.metode || "Tunai",
+            keterangan: item.keterangan || "",
+            createdAt: new Date().toISOString()
+          });
+        }
+        showToast("Berhasil mengimpor 26 data lama!", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Gagal mengimpor data!", "error");
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-arrow-down-circle text-sm"></i><span>Impor 26 Data Transaksi Lama</span>`;
+      }
+    };
+
     function recalculateAndRender() {
       let totalSaldo = 0;
       let pemasukanBulanIni = 0;
@@ -570,7 +591,6 @@
       const now = new Date();
       const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-      // Sort transactions by date descending
       allTransactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
       let formattedRiwayat = allTransactions.map((item, idx) => {
@@ -620,7 +640,7 @@
 
       const listBeranda = document.getElementById("listRiwayatBeranda");
       if (dataRiwayatLengkap.length === 0) {
-        listBeranda.innerHTML = `<div class="text-center text-xs text-slate-400 py-3">Belum ada transaksi.</div>`;
+        listBeranda.innerHTML = `<div class="text-center text-xs text-slate-400 py-4">Belum ada transaksi.</div>`;
       } else {
         listBeranda.innerHTML = "";
         dataRiwayatLengkap.slice(0, 4).forEach(item => { listBeranda.innerHTML += renderItemTransaksiKecil(item); });
@@ -776,7 +796,6 @@
 
     window.bukaDetailTransaksi = function(idx) {
       currentDetailItem = dataRiwayatLengkap[idx];
-      currentDetailIndex = idx;
       const isP = currentDetailItem.jenis === "Pemasukan";
       
       document.getElementById('detailNominal').innerText = (isP ? "+" : "-") + formatRp(currentDetailItem.jumlah);
@@ -850,10 +869,7 @@
       const tanggalVal = document.getElementById("tanggal").value;
       const keteranganVal = document.getElementById("keterangan").value;
 
-      if(!kategoriInput) { 
-        showToast("Pilih kategori terlebih dahulu!", "error"); 
-        return; 
-      }
+      if(!kategoriInput) { showToast("Pilih kategori terlebih dahulu!", "error"); return; }
 
       btn.disabled = true; btn.innerHTML = 'Memproses...';
       let jumlahBersih = document.getElementById("jumlah").value.replace(/\./g, '');
