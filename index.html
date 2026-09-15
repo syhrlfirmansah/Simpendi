@@ -496,6 +496,7 @@
     let dataRiwayatLengkap = []; 
     let allTransactions = [];
     let allBudgets = [];
+    let currentDetailItem = null; // Variabel penyimpan item transaksi yang sedang diklik
 
     // State Kalender Riwayat
     let kalenderTahun = 2026;
@@ -542,7 +543,7 @@
         currentUser = user;
         document.getElementById("halamanLogin").style.display = "none";
         document.getElementById("halamanAppContainer").style.display = "flex";
-        loadData(); // Memuat data sekali ambil (getDocs)
+        loadData();
         showToast("Berhasil masuk ke aplikasi!", "success");
       } else {
         document.getElementById("pesanLogin").innerText = "Masukkan username & password!";
@@ -555,7 +556,6 @@
       }
     }
 
-    // Fungsi Pengambilan Data Sekali Jalan (getDocs) untuk Optimasi Kuota
     async function loadData() {
       try {
         const snapshotTransaksi = await getDocs(collection(db, "transaksi"));
@@ -656,7 +656,6 @@
       renderRiwayatLengkap();
     }
 
-    // Modal Kalender Riwayat Control
     window.bukaModalKalender = function() {
       document.getElementById("modalKalender").classList.remove("hidden");
       renderKalender();
@@ -750,7 +749,6 @@
       }
     }
 
-    // Modal Filter Bulan Anggaran Control
     window.bukaModalFilterBulanAnggaran = function() {
       document.getElementById("modalFilterBulanAnggaran").classList.remove("hidden");
       renderModalBulanAnggaranGrid();
@@ -1003,7 +1001,7 @@
          try {
            await deleteDoc(doc(db, "transaksi", currentDetailItem.id));
            tutupDetailTransaksi();
-           loadData(); // Muat ulang data setelah hapus
+           loadData();
            showToast("Transaksi berhasil dihapus!", "success");
          } catch(err) {
            console.error(err);
@@ -1069,7 +1067,7 @@
         document.getElementById("jumlah").value = "";
         btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
         tutupModalTransaksi();
-        loadData(); // Muat ulang data setelah tambah/edit
+        loadData();
       } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan transaksi!", "error");
@@ -1154,7 +1152,7 @@
         }
         showToast("Anggaran berhasil disimpan!", "success");
         tutupModalAnggaran();
-        loadData(); // Muat ulang data setelah simpan anggaran
+        loadData();
       } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan anggaran!", "error");
