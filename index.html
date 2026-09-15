@@ -618,8 +618,15 @@
       let processedBudgets = filteredBudgets.map(b => {
         let terpakai = 0;
         allTransactions.forEach(t => {
-          if(t.jenis === "Pengeluaran" && t.kategori === b.kategori && t.tanggal && t.tanggal.startsWith(selectedBudgetMonth)) {
-            terpakai += Number(t.jumlah);
+          if(t.jenis === "Pengeluaran" && t.tanggal && t.tanggal.startsWith(selectedBudgetMonth)) {
+            // Pencocokan kategori secara fleksibel (mendukung nama persis atau nama dasar sebelum kurung)
+            let tKat = t.kategori ? t.kategori.trim().toLowerCase() : "";
+            let bKat = b.kategori ? b.kategori.trim().toLowerCase() : "";
+            let bKatPure = bKat.includes(" (") ? bKat.split(" (")[0] : bKat;
+
+            if (tKat === bKat || tKat === bKatPure) {
+              terpakai += Number(t.jumlah);
+            }
           }
         });
         return { ...b, terpakai: terpakai };
