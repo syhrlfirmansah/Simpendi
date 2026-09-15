@@ -855,17 +855,19 @@
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center ${iconClass}"><i class="bi bi-wallet2 text-sm"></i></div>
                 <div>
                   <h4 class="font-bold text-slate-800 text-xs">${item.kategori}</h4>
-                  <p class="text-xs font-medium text-slate-500 mt-0.5">Sisa: <strong class="text-slate-700">${formatRp(sisa)}</strong> <span class="text-slate-400">/ ${formatRp(item.limit)}</span></p>
+                  <p class="text-[10px] font-medium text-slate-400 mt-0.5">Limit: <span class="text-slate-600 font-semibold">${formatRp(item.limit)}</span></p>
                 </div>
               </div>
               <div>${statusBadge}</div>
             </div>
+            
             <div class="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
               <div class="${warnaBar} h-2 rounded-full transition-all duration-500" style="width: ${barWidth}%"></div>
             </div>
+
             <div class="flex justify-between items-center text-xs pt-1">
-              <span class="text-slate-400">Terpakai: <span class="text-slate-600 font-semibold">${formatRp(item.terpakai)}</span></span>
-              <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline"><i class="bi bi-pencil-fill"></i> Edit</button>
+              <span class="text-slate-500 font-medium">Sisa: <strong class="text-slate-800">${formatRp(sisa)}</strong> <span class="text-slate-400 font-normal">/ ${formatRp(item.limit)}</span></span>
+              <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline flex items-center gap-1"><i class="bi bi-pencil-fill text-[10px]"></i> Edit</button>
             </div>
           </div>
         `;
