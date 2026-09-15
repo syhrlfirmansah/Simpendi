@@ -125,7 +125,7 @@
     <!-- APLIKASI UTAMA -->
     <div id="halamanAppContainer" class="flex flex-col h-full">
       
-      <!-- Top Bar dengan Safe Area Notch & Tombol Logout -->
+      <!-- Top Bar -->
       <div class="bg-white/95 backdrop-blur-md px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30" style="padding-top: max(env(safe-area-inset-top), 16px);">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
@@ -135,11 +135,9 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Tombol Logout / Refresh -->
-          <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Keluar & Muat Ulang Data">
+          <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-bold px-3 py-2.5 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Keluar">
             <i class="bi bi-box-arrow-right text-sm"></i>
           </button>
-          <!-- Tombol Transaksi -->
           <button onclick="bukaModalTransaksi()" class="bg-[#009666] hover:bg-[#007d55] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
             <i class="bi bi-plus-lg text-sm"></i>
             <span>Transaksi</span>
@@ -299,7 +297,7 @@
           </div>
 
           <form id="formKeuangan" onsubmit="event.preventDefault(); kirimData();" class="space-y-3.5">
-            <input type="hidden" id="editTransaksiIndex">
+            <input type="hidden" id="editTransaksiDocId">
             
             <div class="flex bg-slate-100 p-1.5 rounded-xl">
               <label class="flex-1 cursor-pointer">
@@ -397,7 +395,7 @@
             <button onclick="tutupModalAnggaran()" class="text-slate-400 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
           </div>
           <form id="formInputAnggaran" onsubmit="event.preventDefault(); prosesSimpanAnggaran();" class="space-y-3.5">
-            <input type="hidden" id="editRowIndex">
+            <input type="hidden" id="editAnggaranDocId">
             
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">1. Nama Kategori</label>
@@ -455,26 +453,36 @@
     </div>
   </div>
 
-  <!-- SCRIPT APLIKASI -->
-  <script>
-    // Pendaftaran Service Worker untuk PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('ServiceWorker registered scope:', reg.scope))
-          .catch(err => console.log('ServiceWorker registration failed:', err));
-      });
-    }
+  <!-- FIREBASE SDK & APP LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbwKZIUR8-s_sS8TpIdKk-Zccofk4OUvo_feXEJnu0nHHY9ttSGNHbzBoTocZ1sGl54/exec";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
+      authDomain: "simpendi-001.firebaseapp.com",
+      projectId: "simpendi-001",
+      storageBucket: "simpendi-001.firebasestorage.app",
+      messagingSenderId: "969874020367",
+      appId: "1:969874020367:web:3c9245e3544616e220ab7a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global variables
+    window.db = db;
+    window.dbOperations = { collection, addDoc, getDocs, onSnapshot, deleteDoc, doc, updateDoc };
 
     let currentUser = "Admin";
-    let cachedAppData = null;
+    let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
     let currentFilterJenis = "Semua";
     let dataRiwayatLengkap = []; 
     let currentDetailItem = null; 
     let currentDetailIndex = null;
-    
+    let allTransactions = [];
+    let allBudgets = [];
+
     const formatRp = (angka) => {
       let isNegative = angka < 0;
       let absStr = Math.abs(angka).toLocaleString('id-ID');
@@ -484,18 +492,16 @@
     document.getElementById('tanggal').valueAsDate = new Date();
     document.getElementById("filterBulanRiwayat").value = new Date().getMonth() + 1;
 
-    // Fungsi Modern Toast Notification
-    function showToast(message, type = 'success') {
+    // Toast Notification
+    window.showToast = function(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      
       let icon = type === 'success' ? 'bi-check-circle-fill text-[#009666]' : 'bi-exclamation-circle-fill text-rose-500';
 
       toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold bg-slate-900/95 text-white border border-slate-800 shadow-2xl backdrop-blur-md transition-all duration-300 translate-y-[-15px] opacity-0`;
       toast.innerHTML = `<i class="bi ${icon} text-base"></i><span>${message}</span>`;
       
       container.appendChild(toast);
-      
       setTimeout(() => {
         toast.classList.remove('translate-y-[-15px]', 'opacity-0');
         toast.classList.add('translate-y-0', 'opacity-100');
@@ -504,143 +510,113 @@
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-[-15px]', 'opacity-0');
-        setTimeout(() => {
-          container.removeChild(toast);
-        }, 300);
+        setTimeout(() => { container.removeChild(toast); }, 300);
       }, 3000);
     }
 
-    // Muat data dari Cache Lokal jika ada (Mode Cepat / Offline)
-    window.addEventListener('DOMContentLoaded', () => {
-      const localCache = localStorage.getItem('simpendi_offline_cache');
-      if (localCache) {
-        try {
-          cachedAppData = JSON.parse(localCache);
-          document.getElementById("halamanLogin").style.display = "none";
-          document.getElementById("halamanAppContainer").style.display = "flex";
-          renderSemuaData();
-        } catch(e) { console.error("Gagal baca cache lokal"); }
-      }
-    });
-
-    // Fungsi Logout yang berfungsi sebagai Refresh / Sinkronisasi Ulang
-    function prosesLogout() {
-      if (confirm("Keluar dan muat ulang data terbaru dari server?")) {
-        localStorage.removeItem('simpendi_offline_cache');
-        location.reload(); 
-      }
-    }
-
-    function formatRibuan(input) {
-      let value = input.value.replace(/\D/g, '');
-      if (value !== "") { input.value = parseInt(value, 10).toLocaleString('id-ID'); } else { input.value = ""; }
-    }
-
-    function formatTglUntukForm(tglStr) {
-        if(!tglStr) return "";
-        if(tglStr.includes("-")) return tglStr;
-        let p = tglStr.split("/");
-        if(p.length === 3) return p[2] + "-" + p[1] + "-" + p[0];
-        return "";
-    }
-
-    function cekKategoriLainnya(select) {
-      const wrapper = document.getElementById("wrapperKategoriManual");
-      const inputManual = document.getElementById("inputKategoriManual");
-      if(select.value === "Lainnya") {
-        wrapper.classList.remove("hidden");
-        inputManual.required = true;
-      } else {
-        wrapper.classList.add("hidden");
-        inputManual.required = false;
-        inputManual.value = "";
-      }
-    }
-
-    function prosesLogin() {
-      const btn = document.getElementById("btnLogin");
-      btn.disabled = true; btn.innerText = "Memuat...";
-      var user = document.getElementById("username").value;
-      var pass = document.getElementById("password").value;
-
-      fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "cekLogin", user: user, pass: pass })
-      })
-      .then(res => res.json())
-      .then(nama => {
-          if (nama) {
-            currentUser = nama;
-            muatDataDinamisBerhasilLogin();
-          } else {
-            showToast("Username atau kata sandi salah!", "error");
-            btn.disabled = false; btn.innerText = "Masuk";
-          }
-      })
-      .catch(err => {
-        if (user.toLowerCase() === "admin" && pass === "admin123" && localStorage.getItem('simpendi_offline_cache')) {
-          currentUser = "Admin";
-          document.getElementById("halamanLogin").style.display = "none";
-          document.getElementById("halamanAppContainer").style.display = "flex";
-          cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
-          renderSemuaData();
-        } else {
-          console.error(err);
-          showToast("Gagal terhubung ke server!", "error");
-          btn.disabled = false; btn.innerText = "Masuk";
-        }
+    // Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
       });
     }
 
-    function muatDataDinamisBerhasilLogin() {
-      fetch(`${API_URL}?action=getAllAppData&user=${encodeURIComponent(currentUser)}`)
-        .then(res => res.json())
-        .then(response => {
-          cachedAppData = response;
-          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response));
-          document.getElementById("halamanLogin").style.display = "none";
-          document.getElementById("halamanAppContainer").style.display = "flex";
-          renderSemuaData();
-        })
-        .catch(err => {
-          if (localStorage.getItem('simpendi_offline_cache')) {
-            cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
-            document.getElementById("halamanLogin").style.display = "none";
-            document.getElementById("halamanAppContainer").style.display = "flex";
-            renderSemuaData();
-          }
-        });
+    window.prosesLogin = function() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      if(user && pass) {
+        currentUser = user;
+        document.getElementById("halamanLogin").style.display = "none";
+        document.getElementById("halamanAppContainer").style.display = "flex";
+        initFirebaseListeners();
+        showToast("Berhasil masuk ke aplikasi!", "success");
+      } else {
+        document.getElementById("pesanLogin").innerText = "Masukkan username & password!";
+      }
     }
 
-    function muatDataDinamis() {
-      fetch(`${API_URL}?action=getAllAppData&user=${encodeURIComponent(currentUser)}`)
-        .then(res => res.json())
-        .then(response => {
-          cachedAppData = response;
-          localStorage.setItem('simpendi_offline_cache', JSON.stringify(response));
-          renderSemuaData();
-        })
-        .catch(err => {
-          if(localStorage.getItem('simpendi_offline_cache')) {
-            cachedAppData = JSON.parse(localStorage.getItem('simpendi_offline_cache'));
-            renderSemuaData();
+    window.prosesLogout = function() {
+      if (confirm("Keluar dari aplikasi?")) {
+        location.reload();
+      }
+    }
+
+    // Realtime Sync with Firebase Firestore
+    function initFirebaseListeners() {
+      // Listen to Transactions
+      onSnapshot(collection(db, "transaksi"), (snapshot) => {
+        allTransactions = [];
+        snapshot.forEach((docItem) => {
+          allTransactions.push({ id: docItem.id, ...docItem.data() });
+        });
+        recalculateAndRender();
+      });
+
+      // Listen to Budgets
+      onSnapshot(collection(db, "anggaran"), (snapshot) => {
+        allBudgets = [];
+        snapshot.forEach((docItem) => {
+          allBudgets.push({ id: docItem.id, ...docItem.data() });
+        });
+        recalculateAndRender();
+      });
+    }
+
+    function recalculateAndRender() {
+      let totalSaldo = 0;
+      let pemasukanBulanIni = 0;
+      let pengeluaranBulanIni = 0;
+      
+      const now = new Date();
+      const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      // Sort transactions by date descending
+      allTransactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+      let formattedRiwayat = allTransactions.map((item, idx) => {
+        if(item.jenis === "Pemasukan") totalSaldo += Number(item.jumlah);
+        if(item.jenis === "Pengeluaran") totalSaldo -= Number(item.jumlah);
+
+        if(item.tanggal && item.tanggal.startsWith(currentYearMonth)) {
+          if(item.jenis === "Pemasukan") pemasukanBulanIni += Number(item.jumlah);
+          if(item.jenis === "Pengeluaran") pengeluaranBulanIni += Number(item.jumlah);
+        }
+
+        let displayDate = item.tanggal;
+        if(item.tanggal && item.tanggal.includes("-")) {
+          let p = item.tanggal.split("-");
+          if(p.length === 3) displayDate = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        return { ...item, tanggalFormatted: displayDate, _localIdx: idx };
+      });
+
+      let processedBudgets = allBudgets.map(b => {
+        let terpakai = 0;
+        allTransactions.forEach(t => {
+          if(t.jenis === "Pengeluaran" && t.kategori === b.kategori && t.tanggal && t.tanggal.startsWith(currentYearMonth)) {
+            terpakai += Number(t.jumlah);
           }
         });
+        return { ...b, terpakai: terpakai };
+      });
+
+      cachedAppData = {
+        dashboard: { saldo: totalSaldo, pemasukan: pemasukanBulanIni, pengeluaran: pengeluaranBulanIni, riwayat: formattedRiwayat },
+        anggaran: processedBudgets
+      };
+
+      renderSemuaData();
     }
 
     function renderSemuaData() {
       if (!cachedAppData) return;
-      
       const d = cachedAppData.dashboard;
       document.getElementById("txtSaldo").innerText = formatRp(d.saldo);
       document.getElementById("txtPemasukanCard").innerText = formatRp(d.pemasukan);
       document.getElementById("txtPengeluaranCard").innerText = formatRp(d.pengeluaran);
 
-      dataRiwayatLengkap = d.riwayat.map((item, idx) => {
-          item._localIdx = idx;
-          return item;
-      });
+      dataRiwayatLengkap = d.riwayat;
 
       const listBeranda = document.getElementById("listRiwayatBeranda");
       if (dataRiwayatLengkap.length === 0) {
@@ -668,8 +644,8 @@
       let totalTerpakaiGlobal = 0;
 
       daftarAnggaran.forEach((item, index) => {
-        totalLimitGlobal += item.limit;
-        totalTerpakaiGlobal += item.terpakai;
+        totalLimitGlobal += Number(item.limit);
+        totalTerpakaiGlobal += Number(item.terpakai);
         let persen = item.limit > 0 ? (item.terpakai / item.limit) * 100 : 0;
         let barWidth = persen > 100 ? 100 : persen;
         let sisa = item.limit - item.terpakai;
@@ -699,7 +675,7 @@
             </div>
             <div class="flex justify-between items-center text-xs pt-1">
               <span class="text-slate-400">Sisa: <strong class="text-slate-700">${formatRp(sisa)}</strong></span>
-              <button onclick="bukaModalEdit(${item.rowIndex}, '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline"><i class="bi bi-pencil-fill"></i> Edit</button>
+              <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline"><i class="bi bi-pencil-fill"></i> Edit</button>
             </div>
           </div>
         `;
@@ -715,7 +691,7 @@
       updateDropdownKategoriOptions();
     }
 
-    function updateDropdownKategoriOptions() {
+    window.updateDropdownKategoriOptions = function() {
       const select = document.getElementById("kategori");
       const jenis = document.querySelector('input[name="jenis"]:checked').value;
       select.innerHTML = "";
@@ -739,7 +715,7 @@
       }
     }
 
-    function renderRiwayatLengkap() {
+    window.renderRiwayatLengkap = function() {
       if (!cachedAppData) return;
       const container = document.getElementById("listRiwayatLengkap");
       const bulan = document.getElementById("filterBulanRiwayat").value;
@@ -750,16 +726,16 @@
          let matchKeyword = item.kategori.toLowerCase().includes(keyword) || (item.keterangan && item.keterangan.toLowerCase().includes(keyword));
          let matchBulan = true;
          if(bulan !== "Semua") {
-            let parts = item.tanggal.split("/");
-            if(parseInt(parts[1], 10) !== parseInt(bulan)) matchBulan = false;
+            let parts = item.tanggal.split("-");
+            if(parts.length === 3 && parseInt(parts[1], 10) !== parseInt(bulan)) matchBulan = false;
          }
          return matchJenis && matchKeyword && matchBulan;
       });
 
       let tMasuk = 0, tKeluar = 0;
       filtered.forEach(i => {
-        if(i.jenis === "Pemasukan") tMasuk += i.jumlah;
-        if(i.jenis === "Pengeluaran") tKeluar += i.jumlah;
+        if(i.jenis === "Pemasukan") tMasuk += Number(i.jumlah);
+        if(i.jenis === "Pengeluaran") tKeluar += Number(i.jumlah);
       });
 
       document.getElementById("totalMasukFilter").innerText = formatRp(tMasuk);
@@ -790,7 +766,7 @@
             <div class="w-10 h-10 rounded-xl flex shrink-0 items-center justify-center ${bgIcon}"><i class="bi ${icon} text-sm"></i></div>
             <div>
               <p class="font-bold text-slate-800 text-xs">${item.kategori}</p>
-              <p class="text-[10px] text-slate-400 mt-0.5">${item.tanggal} • ${metodeText}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">${item.tanggalFormatted} • ${metodeText}</p>
               ${textKet}
             </div>
           </div>
@@ -798,7 +774,7 @@
         </div>`;
     }
 
-    function bukaDetailTransaksi(idx) {
+    window.bukaDetailTransaksi = function(idx) {
       currentDetailItem = dataRiwayatLengkap[idx];
       currentDetailIndex = idx;
       const isP = currentDetailItem.jenis === "Pemasukan";
@@ -810,56 +786,49 @@
       document.getElementById('detailIkonBg').className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-2 ${isP ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`;
       document.getElementById('detailIkon').className = `bi text-2xl ${isP ? 'bi-wallet2' : 'bi-cart3'}`;
       document.getElementById('detailKategori').innerText = currentDetailItem.kategori;
-      document.getElementById('detailTanggal').innerText = currentDetailItem.tanggal;
+      document.getElementById('detailTanggal').innerText = currentDetailItem.tanggalFormatted;
       document.getElementById('detailMetode').innerText = currentDetailItem.metode || "Tunai";
       document.getElementById('detailKeterangan').innerText = currentDetailItem.keterangan || "-";
       document.getElementById("modalDetailTransaksi").classList.remove("hidden");
     }
 
-    function tutupDetailTransaksi() { document.getElementById("modalDetailTransaksi").classList.add("hidden"); }
+    window.tutupDetailTransaksi = function() { document.getElementById("modalDetailTransaksi").classList.add("hidden"); }
 
-    function bukaEditTransaksi() {
+    window.bukaEditTransaksi = function() {
       tutupDetailTransaksi();
       document.getElementById("judulModalTransaksi").innerText = "Edit Transaksi";
-      document.getElementById("editTransaksiIndex").value = "EDIT";
+      document.getElementById("editTransaksiDocId").value = currentDetailItem.id;
       
       document.querySelector(`input[name="jenis"][value="${currentDetailItem.jenis}"]`).checked = true;
       updateDropdownKategoriOptions();
       
-      document.getElementById("jumlah").value = currentDetailItem.jumlah.toLocaleString('id-ID');
+      document.getElementById("jumlah").value = Number(currentDetailItem.jumlah).toLocaleString('id-ID');
       setTimeout(() => { document.getElementById("kategori").value = currentDetailItem.kategori; }, 50);
-      document.getElementById("tanggal").value = formatTglUntukForm(currentDetailItem.tanggal);
+      document.getElementById("tanggal").value = currentDetailItem.tanggal;
       document.getElementById("metode").value = currentDetailItem.metode || "Tunai";
-      document.getElementById("keterangan").value = currentDetailItem.keterangan;
+      document.getElementById("keterangan").value = currentDetailItem.keterangan || "";
       
       document.getElementById("btnSimpan").innerText = "Perbarui Transaksi";
       document.getElementById("modalTransaksi").classList.remove("hidden");
     }
 
-    function prosesHapusTransaksi() {
+    window.prosesHapusTransaksi = async function() {
       if(confirm("Yakin ingin menghapus transaksi ini?")) {
          showToast("Menghapus transaksi...", "success");
-         fetch(API_URL, {
-           method: "POST",
-           headers: { "Content-Type": "text/plain;charset=utf-8" },
-           body: JSON.stringify({ action: "hapusTransaksi", rowIndex: currentDetailItem.rowIndex })
-         })
-         .then(res => res.json())
-         .then(() => {
-            tutupDetailTransaksi();
-            showToast("Transaksi berhasil dihapus!", "success");
-            muatDataDinamis();
-         })
-         .catch(err => {
+         try {
+           await deleteDoc(doc(db, "transaksi", currentDetailItem.id));
+           tutupDetailTransaksi();
+           showToast("Transaksi berhasil dihapus!", "success");
+         } catch(err) {
            console.error(err);
            showToast("Gagal menghapus transaksi!", "error");
-         });
+         }
       }
     }
 
-    function bukaModalTransaksi() { 
+    window.bukaModalTransaksi = function() { 
       document.getElementById("judulModalTransaksi").innerText = "Tambah Transaksi";
-      document.getElementById("editTransaksiIndex").value = "";
+      document.getElementById("editTransaksiDocId").value = "";
       document.getElementById("btnSimpan").innerText = "Simpan Transaksi";
       document.getElementById('tanggal').valueAsDate = new Date();
       document.getElementById('jumlah').value = "";
@@ -868,15 +837,18 @@
       updateDropdownKategoriOptions(); 
     }
     
-    function tutupModalTransaksi() { document.getElementById("modalTransaksi").classList.add("hidden"); }
+    window.tutupModalTransaksi = function() { document.getElementById("modalTransaksi").classList.add("hidden"); }
 
-    function kirimData() {
+    window.kirimData = async function() {
       const btn = document.getElementById("btnSimpan");
-      const isEdit = document.getElementById("editTransaksiIndex").value !== "";
+      const docId = document.getElementById("editTransaksiDocId").value;
+      const isEdit = docId !== "";
       
       const jenisVal = document.querySelector('input[name="jenis"]:checked').value;
       const metodeVal = document.getElementById("metode").value;
       const kategoriInput = document.getElementById("kategori").value;
+      const tanggalVal = document.getElementById("tanggal").value;
+      const keteranganVal = document.getElementById("keterangan").value;
 
       if(!kategoriInput) { 
         showToast("Pilih kategori terlebih dahulu!", "error"); 
@@ -886,40 +858,42 @@
       btn.disabled = true; btn.innerHTML = 'Memproses...';
       let jumlahBersih = document.getElementById("jumlah").value.replace(/\./g, '');
       
-      const dataBaru = { 
-          action: isEdit ? "editTransaksi" : "simpanData",
-          rowIndex: isEdit ? currentDetailItem.rowIndex : null,
-          user: currentUser, 
-          tanggal: document.getElementById("tanggal").value, 
-          jenis: jenisVal, 
-          metode: metodeVal, 
-          kategori: kategoriInput, 
-          keterangan: document.getElementById("keterangan").value, 
-          jumlah: jumlahBersih 
-      };
-
-      fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(dataBaru)
-      })
-      .then(res => res.json())
-      .then(() => {
-         showToast(isEdit ? 'Transaksi berhasil diperbarui!' : 'Transaksi berhasil dicatat!', 'success');
-         document.getElementById("keterangan").value = "";
-         document.getElementById("jumlah").value = "";
-         btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
-         tutupModalTransaksi(); 
-         muatDataDinamis();
-      })
-      .catch(err => {
+      try {
+        if(isEdit) {
+          await updateDoc(doc(db, "transaksi", docId), {
+            jenis: jenisVal,
+            jumlah: Number(jumlahBersih),
+            kategori: kategoriInput,
+            tanggal: tanggalVal,
+            metode: metodeVal,
+            keterangan: keteranganVal
+          });
+          showToast("Transaksi berhasil diperbarui!", "success");
+        } else {
+          await addDoc(collection(db, "transaksi"), {
+            user: currentUser,
+            jenis: jenisVal,
+            jumlah: Number(jumlahBersih),
+            kategori: kategoriInput,
+            tanggal: tanggalVal,
+            metode: metodeVal,
+            keterangan: keteranganVal,
+            createdAt: new Date().toISOString()
+          });
+          showToast("Transaksi berhasil dicatat!", "success");
+        }
+        document.getElementById("keterangan").value = "";
+        document.getElementById("jumlah").value = "";
+        btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
+        tutupModalTransaksi();
+      } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan transaksi!", "error");
         btn.disabled = false; btn.innerHTML = isEdit ? "Perbarui Transaksi" : "Simpan Transaksi";
-      });
+      }
     }
 
-    function setFilterJenis(jenis) {
+    window.setFilterJenis = function(jenis) {
       currentFilterJenis = jenis;
       document.getElementById("btnFilterSemua").className = jenis === "Semua" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0";
       document.getElementById("btnFilterMasuk").className = jenis === "Pemasukan" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0";
@@ -927,9 +901,9 @@
       renderRiwayatLengkap();
     }
 
-    function bukaFormTambahAnggaran() {
+    window.bukaFormTambahAnggaran = function() {
       document.getElementById("judulModalAnggaran").innerText = "Tambah Anggaran";
-      document.getElementById("editRowIndex").value = "";
+      document.getElementById("editAnggaranDocId").value = "";
       document.getElementById("inputKategoriBaru").value = "";
       document.getElementById("wrapperKategoriManual").classList.add("hidden");
       document.getElementById("inputKategoriManual").value = "";
@@ -938,9 +912,9 @@
       document.getElementById("modalAnggaran").classList.remove("hidden");
     }
 
-    function bukaModalEdit(rowIndex, kategoriLengkap, limit) {
+    window.bukaModalEditAnggaran = function(docId, kategoriLengkap, limit) {
       document.getElementById("judulModalAnggaran").innerText = "Edit Anggaran";
-      document.getElementById("editRowIndex").value = rowIndex;
+      document.getElementById("editAnggaranDocId").value = docId;
       const selectKat = document.getElementById("inputKategoriBaru");
       let namaKatMurni = kategoriLengkap;
       let kantongUangAsli = "ShopeePay"; 
@@ -962,49 +936,60 @@
         document.getElementById("inputKategoriManual").value = namaKatMurni;
       }
       document.getElementById("inputKantongUang").value = kantongUangAsli;
-      document.getElementById("inputLimitBaru").value = limit.toLocaleString('id-ID');
+      document.getElementById("inputLimitBaru").value = Number(limit).toLocaleString('id-ID');
       document.getElementById("modalAnggaran").classList.remove("hidden");
     }
 
-    function tutupModalAnggaran() { document.getElementById("modalAnggaran").classList.add("hidden"); }
+    window.tutupModalAnggaran = function() { document.getElementById("modalAnggaran").classList.add("hidden"); }
 
-    function prosesSimpanAnggaran() {
-      const rowIndex = document.getElementById("editRowIndex").value;
+    window.prosesSimpanAnggaran = async function() {
+      const docId = document.getElementById("editAnggaranDocId").value;
       const selectKatVal = document.getElementById("inputKategoriBaru").value;
       let kategoriKat = selectKatVal === "Lainnya" ? document.getElementById("inputKategoriManual").value : selectKatVal;
       const kantongUang = document.getElementById("inputKantongUang").value;
       let kategoriBaru = `${kategoriKat} (${kantongUang})`;
       let limitBersih = document.getElementById("inputLimitBaru").value.replace(/\./g, '');
       
-      const actionType = rowIndex === "" ? "simpanAnggaranBaru" : "updateAnggaran";
-      const payload = {
-        action: actionType,
-        user: currentUser,
-        rowIndex: rowIndex,
-        kategori: kategoriBaru,
-        kategoriBaru: kategoriBaru,
-        limit: limitBersih,
-        limitBaru: limitBersih
-      };
-
-      fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(() => {
+      try {
+        if(docId) {
+          await updateDoc(doc(db, "anggaran", docId), {
+            kategori: kategoriBaru,
+            limit: Number(limitBersih)
+          });
+        } else {
+          await addDoc(collection(db, "anggaran"), {
+            user: currentUser,
+            kategori: kategoriBaru,
+            limit: Number(limitBersih)
+          });
+        }
         showToast("Anggaran berhasil disimpan!", "success");
-        tutupModalAnggaran(); 
-        muatDataDinamis();
-      })
-      .catch(err => {
+        tutupModalAnggaran();
+      } catch(err) {
         console.error(err);
         showToast("Gagal menyimpan anggaran!", "error");
-      });
+      }
     }
 
-    function gantiTab(tabId) {
+    window.formatRibuan = function(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value !== "") { input.value = parseInt(value, 10).toLocaleString('id-ID'); } else { input.value = ""; }
+    }
+
+    window.cekKategoriLainnya = function(select) {
+      const wrapper = document.getElementById("wrapperKategoriManual");
+      const inputManual = document.getElementById("inputKategoriManual");
+      if(select.value === "Lainnya") {
+        wrapper.classList.remove("hidden");
+        inputManual.required = true;
+      } else {
+        wrapper.classList.add("hidden");
+        inputManual.required = false;
+        inputManual.value = "";
+      }
+    }
+
+    window.gantiTab = function(tabId) {
       ['beranda', 'riwayat', 'anggaran'].forEach(id => {
         document.getElementById("tab-" + id).classList.add("hidden");
         document.getElementById("nav-" + id).classList.remove("active");
