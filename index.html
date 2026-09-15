@@ -201,9 +201,25 @@
         <!-- ANGGARAN -->
         <div id="tab-anggaran" class="tab-pane hidden space-y-3.5">
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3.5">
-            <div>
-              <h3 class="font-bold text-slate-800 text-base">Anggaran Bulanan</h3>
-              <p class="text-xs text-slate-400">Limit anggaran tetap tersimpan, pemakaian terpakai reset tiap bulan.</p>
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base">Anggaran Bulanan</h3>
+                <p class="text-xs text-slate-400">Atur & pantau anggaran tiap bulan.</p>
+              </div>
+              <select id="filterBulanAnggaran" onchange="recalculateAndRender()" class="bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:border-[#009666] shadow-sm">
+                <option value="2026-01">Januari 2026</option>
+                <option value="2026-02">Februari 2026</option>
+                <option value="2026-03">Maret 2026</option>
+                <option value="2026-04">April 2026</option>
+                <option value="2026-05">Mei 2026</option>
+                <option value="2026-06">Juni 2026</option>
+                <option value="2026-07">Juli 2026</option>
+                <option value="2026-08">Agustus 2026</option>
+                <option value="2026-09" selected>September 2026</option>
+                <option value="2026-10">Oktober 2026</option>
+                <option value="2026-11">November 2026</option>
+                <option value="2026-12">Desember 2026</option>
+              </select>
             </div>
             
             <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center justify-between">
@@ -229,14 +245,8 @@
           </div>
 
           <div class="space-y-2.5">
-            <div class="flex justify-between items-center px-1">
-              <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Kategori Anggaran</h3>
-              <select id="filterAnggaran" onchange="renderListAnggaranDanKategori()" class="bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-bold rounded-xl px-2.5 py-1.5 outline-none focus:border-[#009666]">
-                <option value="semua">Urutan Normal (Semua)</option>
-                <option value="terbesar">Sisa Terbesar ke Terkecil</option>
-                <option value="masih_ada">Dana Masih Ada</option>
-                <option value="habis">Dana Habis</option>
-              </select>
+            <div class="px-1">
+              <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Kategori Anggaran (Sisa Terbesar)</h3>
             </div>
 
             <div id="listAnggaranDinamis" class="space-y-2.5">
@@ -244,7 +254,7 @@
             </div>
             
             <div onclick="bukaFormTambahAnggaran()" class="bg-slate-50 border border-dashed border-emerald-300 hover:border-[#009666] p-4 rounded-2xl text-center cursor-pointer transition-all active:scale-[0.99]">
-              <span class="text-[#009666] text-xs font-bold flex items-center justify-center gap-1.5"><i class="bi bi-plus-lg text-sm"></i> Tambah Anggaran Kategori</span>
+              <span class="text-[#009666] text-xs font-bold flex items-center justify-center gap-1.5"><i class="bi bi-plus-lg text-sm"></i> Tambah Anggaran Bulan Ini</span>
             </div>
           </div>
         </div>
@@ -542,10 +552,22 @@
         return { ...item, tanggalFormatted: displayDate, _localIdx: idx };
       });
 
-      let processedBudgets = allBudgets.map(b => {
+      // Ambil bulan aktif yang dipilih pada filter anggaran
+      const selectedBudgetMonth = document.getElementById("filterBulanAnggaran") ? document.getElementById("filterBulanAnggaran").value : currentYearMonth;
+
+      // Filter anggaran sesuai bulan yang dipilih
+      let filteredBudgets = allBudgets.filter(b => {
+        // Jika data anggaran lama tidak ada properti bulan, masukkan ke bulan aktif atau abaikan, di sini kita cocokkan jika b.bulan === selectedBudgetMonth (atau jika belum ada bulan dan bulan aktif adalah September 2026)
+        if (!b.bulan) {
+          return selectedBudgetMonth === "2026-09";
+        }
+        return b.bulan === selectedBudgetMonth;
+      });
+
+      let processedBudgets = filteredBudgets.map(b => {
         let terpakai = 0;
         allTransactions.forEach(t => {
-          if(t.jenis === "Pengeluaran" && t.kategori === b.kategori && t.tanggal && t.tanggal.startsWith(currentYearMonth)) {
+          if(t.jenis === "Pengeluaran" && t.kategori === b.kategori && t.tanggal && t.tanggal.startsWith(selectedBudgetMonth)) {
             terpakai += Number(t.jumlah);
           }
         });
@@ -584,25 +606,24 @@
     window.renderListAnggaranDanKategori = function() {
       const kontainerAnggaran = document.getElementById("listAnggaranDinamis");
       let daftarAnggaran = [...cachedAppData.anggaran];
-      const filterVal = document.getElementById("filterAnggaran") ? document.getElementById("filterAnggaran").value : "semua";
 
+      // Tambahkan informasi sisa dan URUTKAN OTOMATIS: Sisa Terbesar ke Terkecil
       daftarAnggaran = daftarAnggaran.map(item => {
         let sisa = item.limit - item.terpakai;
         return { ...item, sisa: sisa };
       });
 
-      if (filterVal === "masih_ada") {
-        daftarAnggaran = daftarAnggaran.filter(item => item.sisa > 0);
-      } else if (filterVal === "habis") {
-        daftarAnggaran = daftarAnggaran.filter(item => item.sisa <= 0);
-      }
-
-      if (filterVal === "terbesar") {
-        daftarAnggaran.sort((a, b) => b.sisa - a.sisa);
-      }
+      daftarAnggaran.sort((a, b) => b.sisa - a.sisa);
 
       if (daftarAnggaran.length === 0) {
-        kontainerAnggaran.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Tidak ada kategori anggaran yang sesuai.</div>`;
+        kontainerAnggaran.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Belum ada anggaran untuk bulan ini. Silakan tambah!</div>`;
+        document.getElementById("txtTerpakaiAnggaran").innerText = formatRp(0);
+        document.getElementById("txtTotalLimitAnggaran").innerText = formatRp(0);
+        document.getElementById("txtTotalAnggaranGlobal").innerText = formatRp(0);
+        document.getElementById("txtTotalTerpakaiGlobal").innerText = formatRp(0);
+        document.getElementById("txtSisaAnggaranUtama").innerText = formatRp(0);
+        document.getElementById("txtSelisihSaldoAnggaran").innerText = formatRp(cachedAppData.dashboard.saldo);
+        updateDropdownKategoriOptions();
         return;
       }
 
@@ -610,7 +631,7 @@
       let totalLimitGlobal = 0;
       let totalTerpakaiGlobal = 0;
 
-      cachedAppData.anggaran.forEach(item => {
+      daftarAnggaran.forEach(item => {
         totalLimitGlobal += Number(item.limit);
         totalTerpakaiGlobal += Number(item.terpakai);
       });
@@ -667,7 +688,7 @@
       select.innerHTML = "";
       if(jenis === "Pengeluaran") {
         if(cachedAppData.anggaran.length === 0) {
-          select.innerHTML = `<option value="" disabled selected>Buat anggaran dulu!</option>`;
+          select.innerHTML = `<option value="" disabled selected>Buat anggaran bulan ini dulu!</option>`;
         } else {
           select.innerHTML = `<option value="" disabled selected>Pilih Kategori Anggaran</option>`;
           cachedAppData.anggaran.forEach(item => {
@@ -915,18 +936,21 @@
       const kantongUang = document.getElementById("inputKantongUang").value;
       let kategoriBaru = `${kategoriKat} (${kantongUang})`;
       let limitBersih = document.getElementById("inputLimitBaru").value.replace(/\./g, '');
+      const activeMonth = document.getElementById("filterBulanAnggaran").value;
       
       try {
         if(docId) {
           await updateDoc(doc(db, "anggaran", docId), {
             kategori: kategoriBaru,
-            limit: Number(limitBersih)
+            limit: Number(limitBersih),
+            bulan: activeMonth
           });
         } else {
           await addDoc(collection(db, "anggaran"), {
             user: currentUser,
             kategori: kategoriBaru,
-            limit: Number(limitBersih)
+            limit: Number(limitBersih),
+            bulan: activeMonth
           });
         }
         showToast("Anggaran berhasil disimpan!", "success");
