@@ -105,16 +105,16 @@
         <!-- BERANDA -->
         <div id="tab-beranda" class="tab-pane space-y-4">
           
-          <!-- TOMBOL MIGRASI / IMPOR DATA LAMA (MUNCUL JIKA INGIN DIMASUKKAN) -->
+          <!-- TOMBOL MIGRASI / IMPOR DATA LAMA & ANGGARAN -->
           <div id="bannerMigrasi" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2.5 shadow-sm">
             <div class="flex items-center gap-2 text-[#009666] font-bold text-xs">
               <i class="bi bi-cloud-arrow-down-fill text-base"></i>
-              <span>Impor Data Spreadsheet Lama</span>
+              <span>Impor Data Anggaran & Transaksi</span>
             </div>
-            <p class="text-slate-600 text-[11px] leading-relaxed">Klik tombol di bawah ini untuk memasukkan 26 riwayat transaksi lama Anda ke Firebase Firestore secara otomatis.</p>
+            <p class="text-slate-600 text-[11px] leading-relaxed">Belum ada data anggaran di database. Klik tombol di bawah untuk memasukkan data kategori anggaran dan transaksi lama Anda.</p>
             <button onclick="imporDataLamaUI()" id="btnImporUI" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-3 rounded-xl text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
               <i class="bi bi-arrow-down-circle text-sm"></i>
-              <span>Impor 26 Data Transaksi Lama</span>
+              <span>Impor Data Anggaran & Transaksi</span>
             </button>
           </div>
 
@@ -505,15 +505,7 @@
         snapshot.forEach((docItem) => {
           allTransactions.push({ id: docItem.id, ...docItem.data() });
         });
-        
-        // Tampilkan banner migrasi jika data transaksi masih kosong
-        const banner = document.getElementById("bannerMigrasi");
-        if(allTransactions.length === 0) {
-          if(banner) banner.classList.remove("hidden");
-        } else {
-          if(banner) banner.classList.add("hidden");
-        }
-
+        cekDanTampilkanBannerMigrasi();
         recalculateAndRender();
       });
 
@@ -522,16 +514,28 @@
         snapshot.forEach((docItem) => {
           allBudgets.push({ id: docItem.id, ...docItem.data() });
         });
+        cekDanTampilkanBannerMigrasi();
         recalculateAndRender();
       });
     }
 
-    // FUNGSI UTAMA UNTUK TOMBOL IMPOR OTOMATIS DI UI
+    function cekDanTampilkanBannerMigrasi() {
+      const banner = document.getElementById("bannerMigrasi");
+      // Tampilkan banner jika anggaran kosong
+      if(allBudgets.length === 0) {
+        if(banner) banner.classList.remove("hidden");
+      } else {
+        if(banner) banner.classList.add("hidden");
+      }
+    }
+
+    // FUNGSI UTAMA UNTUK TOMBOL IMPOR DATA (TRANSAKSI & ANGGARAN SEKALIGUS)
     window.imporDataLamaUI = async function() {
       const btn = document.getElementById("btnImporUI");
       btn.disabled = true;
-      btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-sm"></i><span>Sedang Mengimpor 26 Data...</span>`;
+      btn.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-sm"></i><span>Sedang Mengimpor Data...</span>`;
 
+      // Data Transaksi CSV
       const dataTransaksiCSV = [
         { "user": "Admin", "tanggal": "2026-09-01", "jenis": "Pemasukan", "kategori": "Gaji", "metode": "QRIS", "jumlah": 1350000, "keterangan": "Anggaran bulan september" },
         { "user": "Admin", "tanggal": "2026-09-02", "jenis": "Pengeluaran", "kategori": "Vitamin (Bank Jago)", "metode": "QRIS", "jumlah": 100000, "keterangan": "HUTANG 300.000 Bayar tiap bulan selama 3 bulan ke depan" },
@@ -561,25 +565,50 @@
         { "user": "Admin", "tanggal": "2026-09-15", "jenis": "Pengeluaran", "kategori": "Jajan (ShopeePay)", "metode": "QRIS", "jumlah": 7500, "keterangan": "Beli tali buat topi" }
       ];
 
+      // Data Anggaran Default / Standar sesuai kategori pada transaksi Anda
+      const dataAnggaranDefault = [
+        { "user": "Admin", "kategori": "Jajan (ShopeePay)", "limit": 500000 },
+        { "user": "Admin", "kategori": "Bensin (Bank Jago)", "limit": 200000 },
+        { "user": "Admin", "kategori": "Vitamin (Bank Jago)", "limit": 150000 },
+        { "user": "Admin", "kategori": "Kuota (Bank Jago)", "limit": 100000 },
+        { "user": "Admin", "kategori": "Transportasi (Bank Jago)", "limit": 200000 },
+        { "user": "Admin", "kategori": "Dana darurat (Bank Jago)", "limit": 300000 }
+      ];
+
       try {
-        for (let item of dataTransaksiCSV) {
-          await addDoc(collection(db, "transaksi"), {
-            user: item.user || "Admin",
-            jenis: item.jenis,
-            jumlah: Number(item.jumlah),
-            kategori: item.kategori,
-            tanggal: item.tanggal,
-            metode: item.metode || "Tunai",
-            keterangan: item.keterangan || "",
-            createdAt: new Date().toISOString()
-          });
+        // Cek apakah transaksi sudah ada sebelumnya agar tidak duplikat ganda
+        if(allTransactions.length === 0) {
+          for (let item of dataTransaksiCSV) {
+            await addDoc(collection(db, "transaksi"), {
+              user: item.user || "Admin",
+              jenis: item.jenis,
+              jumlah: Number(item.jumlah),
+              kategori: item.kategori,
+              tanggal: item.tanggal,
+              metode: item.metode || "Tunai",
+              keterangan: item.keterangan || "",
+              createdAt: new Date().toISOString()
+            });
+          }
         }
-        showToast("Berhasil mengimpor 26 data lama!", "success");
+
+        // Masukkan data anggaran jika masih kosong
+        if(allBudgets.length === 0) {
+          for (let ang of dataAnggaranDefault) {
+            await addDoc(collection(db, "anggaran"), {
+              user: ang.user || "Admin",
+              kategori: ang.kategori,
+              limit: Number(ang.limit)
+            });
+          }
+        }
+
+        showToast("Berhasil mengimpor data transaksi & anggaran!", "success");
       } catch (err) {
         console.error(err);
         showToast("Gagal mengimpor data!", "error");
         btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-arrow-down-circle text-sm"></i><span>Impor 26 Data Transaksi Lama</span>`;
+        btn.innerHTML = `<i class="bi bi-arrow-down-circle text-sm"></i><span>Impor Data Anggaran & Transaksi</span>`;
       }
     };
 
