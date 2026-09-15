@@ -154,33 +154,15 @@
         <!-- RIWAYAT -->
         <div id="tab-riwayat" class="tab-pane hidden space-y-3.5">
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
-            <div>
-              <h3 class="font-bold text-slate-800 text-base">Riwayat Transaksi</h3>
-              <p class="text-xs text-slate-400">Pilih tanggal pada kalender untuk melihat detail transaksi masuk dan keluar.</p>
-            </div>
-
-            <!-- KARTU KALENDER INTERAKTIF -->
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-              <div class="flex justify-between items-center px-1">
-                <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
-                <span id="labelBulanTahun" class="font-bold text-slate-800 text-xs">September 2026</span>
-                <button onclick="ubahBulanKalender(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base">Riwayat Transaksi</h3>
+                <p class="text-xs text-slate-400">Semua riwayat transaksi tercatat.</p>
               </div>
-              
-              <!-- Hari Header -->
-              <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 uppercase">
-                <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
-              </div>
-
-              <!-- Grid Tanggal -->
-              <div id="gridKalender" class="grid grid-cols-7 gap-1 text-center text-xs">
-                <!-- Diisi via JavaScript -->
-              </div>
-
-              <div id="infoFilterAktif" class="hidden flex justify-between items-center pt-2 border-t border-slate-100 text-[11px]">
-                <span class="text-slate-500 font-medium" id="teksFilterAktif">Menampilkan tanggal: -</span>
-                <button onclick="resetFilterTanggal()" class="text-[#009666] font-bold hover:underline">Tampilkan Semua</button>
-              </div>
+              <button onclick="bukaModalKalender()" class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                <i class="bi bi-calendar-event text-[#009666] text-sm"></i>
+                <span id="labelTombolFilterTanggal">Filter Tanggal</span>
+              </button>
             </div>
 
             <div class="relative pt-1">
@@ -276,6 +258,36 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- MODAL KALENDER POP-UP -->
+      <div id="modalKalender" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <h3 class="font-bold text-slate-800 text-sm">Pilih Tanggal Riwayat</h3>
+            <button onclick="tutupModalKalender()" class="text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center px-1">
+              <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
+              <span id="labelBulanTahun" class="font-bold text-slate-800 text-xs">September 2026</span>
+              <button onclick="ubahBulanKalender(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 uppercase">
+              <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
+            </div>
+
+            <div id="gridKalender" class="grid grid-cols-7 gap-1 text-center text-xs">
+              <!-- Diisi via JavaScript -->
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex gap-2">
+            <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Semua Bulan</button>
+          </div>
+        </div>
       </div>
 
       <!-- MODAL TRANSAKSI -->
@@ -599,7 +611,6 @@
 
       renderSemuaData();
     }
-    // Daftarkan fungsi ke window agar dapat dipanggil dari inline HTML onchange
     window.recalculateAndRender = recalculateAndRender;
 
     function renderSemuaData() {
@@ -624,7 +635,16 @@
       renderRiwayatLengkap();
     }
 
-    // Fungsi Render Kalender Interaktif
+    // Modal Kalender Pop-up Control
+    window.bukaModalKalender = function() {
+      document.getElementById("modalKalender").classList.remove("hidden");
+      renderKalender();
+    }
+
+    window.tutupModalKalender = function() {
+      document.getElementById("modalKalender").classList.add("hidden");
+    }
+
     window.ubahBulanKalender = function(delta) {
       kalenderBulan += delta;
       if (kalenderBulan > 11) {
@@ -635,19 +655,30 @@
         kalenderTahun--;
       }
       renderKalender();
-      renderRiwayatLengkap();
     }
 
     window.pilihTanggalKalender = function(tanggalStr) {
       selectedTanggalFilter = selectedTanggalFilter === tanggalStr ? null : tanggalStr;
-      renderKalender();
+      tutupModalKalender();
+      updateLabelTombolFilter();
       renderRiwayatLengkap();
     }
 
     window.resetFilterTanggal = function() {
       selectedTanggalFilter = null;
-      renderKalender();
+      tutupModalKalender();
+      updateLabelTombolFilter();
       renderRiwayatLengkap();
+    }
+
+    function updateLabelTombolFilter() {
+      const lbl = document.getElementById("labelTombolFilterTanggal");
+      if (selectedTanggalFilter) {
+        let parts = selectedTanggalFilter.split("-");
+        lbl.innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        lbl.innerText = "Filter Tanggal";
+      }
     }
 
     window.renderKalender = function() {
@@ -660,18 +691,15 @@
       const firstDayIndex = (new Date(kalenderTahun, kalenderBulan, 1).getDay() + 6) % 7; // Senin = 0
       const totalDays = new Date(kalenderTahun, kalenderBulan + 1, 0).getDate();
 
-      // Kotak kosong sebelum tanggal 1
       for (let i = 0; i < firstDayIndex; i++) {
         grid.innerHTML += `<div></div>`;
       }
 
-      // Render setiap hari dalam bulan
       for (let day = 1; day <= totalDays; day++) {
         const mm = String(kalenderBulan + 1).padStart(2, '0');
         const dd = String(day).padStart(2, '0');
         const dateStr = `${kalenderTahun}-${mm}-${dd}`;
 
-        // Cek transaksi pada tanggal ini
         let hasMasuk = false;
         let hasKeluar = false;
         allTransactions.forEach(t => {
@@ -687,7 +715,6 @@
           bgClass = "bg-[#009666] text-white font-bold shadow-sm";
         }
 
-        // Dot indikator
         let dotsHtml = `<div class="flex justify-center gap-0.5 mt-0.5 h-1">`;
         if (hasMasuk) dotsHtml += `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}"></span>`;
         if (hasKeluar) dotsHtml += `<span class="w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-rose-500'}"></span>`;
@@ -700,17 +727,6 @@
           </div>
         `;
       }
-
-      // Tampilkan info filter aktif
-      const infoBox = document.getElementById("infoFilterAktif");
-      const teksInfo = document.getElementById("teksFilterAktif");
-      if (selectedTanggalFilter) {
-        infoBox.classList.remove("hidden");
-        let parts = selectedTanggalFilter.split("-");
-        teksInfo.innerText = `Filter tanggal: ${parts[2]}/${parts[1]}/${parts[0]}`;
-      } else {
-        infoBox.classList.add("hidden");
-      }
     }
 
     window.renderListAnggaranDanKategori = function() {
@@ -722,7 +738,6 @@
         return { ...item, sisa: sisa };
       });
 
-      // Urutkan otomatis: Sisa Terbesar ke Terkecil
       daftarAnggaran.sort((a, b) => b.sisa - a.sisa);
 
       if (daftarAnggaran.length === 0) {
@@ -828,7 +843,6 @@
          if (selectedTanggalFilter) {
             matchTanggal = item.tanggal === selectedTanggalFilter;
          } else {
-            // Default tampilkan bulan yang sedang aktif di kalender
             const mm = String(kalenderBulan + 1).padStart(2, '0');
             const targetYM = `${kalenderTahun}-${mm}`;
             matchTanggal = item.tanggal && item.tanggal.startsWith(targetYM);
