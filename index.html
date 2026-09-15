@@ -80,8 +80,8 @@
     <!-- APLIKASI UTAMA -->
     <div id="halamanAppContainer" class="flex flex-col h-full">
       
-      <!-- Top Bar -->
-      <div class="bg-white/95 backdrop-blur-md px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30" style="padding-top: max(env(safe-area-inset-top), 16px);">
+      <!-- Top Bar (Solid White - No Blur) -->
+      <div class="bg-white px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30 shadow-sm" style="padding-top: max(env(safe-area-inset-top), 16px);">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
           <div>
@@ -199,6 +199,8 @@
 
         <!-- ANGGARAN -->
         <div id="tab-anggaran" class="tab-pane hidden space-y-3.5">
+          
+          <!-- KARTU RINGKASAN ANGGARAN UTAMA -->
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3.5">
             <div class="flex justify-between items-center">
               <div>
@@ -619,7 +621,6 @@
         let terpakai = 0;
         allTransactions.forEach(t => {
           if(t.jenis === "Pengeluaran" && t.tanggal && t.tanggal.startsWith(selectedBudgetMonth)) {
-            // Pencocokan kategori secara fleksibel (mendukung nama persis atau nama dasar sebelum kurung)
             let tKat = t.kategori ? t.kategori.trim().toLowerCase() : "";
             let bKat = b.kategori ? b.kategori.trim().toLowerCase() : "";
             let bKatPure = bKat.includes(" (") ? bKat.split(" (")[0] : bKat;
@@ -854,7 +855,7 @@
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center ${iconClass}"><i class="bi bi-wallet2 text-sm"></i></div>
                 <div>
                   <h4 class="font-bold text-slate-800 text-xs">${item.kategori}</h4>
-                  <p class="text-xs font-medium text-slate-500 mt-0.5">${formatRp(item.terpakai)} / ${formatRp(item.limit)}</p>
+                  <p class="text-xs font-medium text-slate-500 mt-0.5">Sisa: <strong class="text-slate-700">${formatRp(sisa)}</strong> <span class="text-slate-400">/ ${formatRp(item.limit)}</span></p>
                 </div>
               </div>
               <div>${statusBadge}</div>
@@ -863,7 +864,7 @@
               <div class="${warnaBar} h-2 rounded-full transition-all duration-500" style="width: ${barWidth}%"></div>
             </div>
             <div class="flex justify-between items-center text-xs pt-1">
-              <span class="text-slate-400">Sisa: <strong class="text-slate-700">${formatRp(sisa)}</strong></span>
+              <span class="text-slate-400">Terpakai: <span class="text-slate-600 font-semibold">${formatRp(item.terpakai)}</span></span>
               <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline"><i class="bi bi-pencil-fill"></i> Edit</button>
             </div>
           </div>
