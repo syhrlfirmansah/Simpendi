@@ -209,7 +209,7 @@
               </div>
               <button onclick="bukaModalFilterBulanAnggaran()" class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm transition-all active:scale-95">
                 <i class="bi bi-calendar-event text-[#009666] text-sm"></i>
-                <span id="labelTombolFilterBulanAnggaran">September 2026</span>
+                <span id="labelTombolFilterBulanAnggaran">Oktober 2026</span>
               </button>
             </div>
             
@@ -263,7 +263,7 @@
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
               <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
-              <span id="labelBulanTahun" class="font-bold text-slate-800 text-xs">September 2026</span>
+              <span id="labelBulanTahun" class="font-bold text-slate-800 text-xs">Oktober 2026</span>
               <button onclick="ubahBulanKalender(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
             </div>
             
@@ -500,14 +500,22 @@
     let allBudgets = [];
     let currentDetailItem = null;
 
-    // State Kalender Riwayat
-    let kalenderTahun = 2026;
-    let kalenderBulan = 8; // September (0-index)
+    // State Kalender Riwayat (Otomatis Bulan Berjalan)
+    const initDate = new Date();
+    let kalenderTahun = initDate.getFullYear();
+    let kalenderBulan = initDate.getMonth(); // 0-index (Oktober = 9)
     let selectedTanggalFilter = null;
 
-    // State Filter Bulan Anggaran
-    let selectedBudgetYear = 2026;
-    let selectedBudgetMonthIndex = 8; // September (0-index)
+    // State Filter Bulan Anggaran (Otomatis Bulan Berjalan)
+    let selectedBudgetYear = initDate.getFullYear();
+    let selectedBudgetMonthIndex = initDate.getMonth(); // 0-index (Oktober = 9)
+
+    // Set label awal tombol filter bulan anggaran sesuai bulan berjalan
+    const namaBulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
+      document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
+    });
 
     const formatRp = (angka) => {
       let isNegative = angka < 0;
@@ -612,7 +620,7 @@
 
       let filteredBudgets = allBudgets.filter(b => {
         if (!b.bulan) {
-          return selectedBudgetMonth === "2026-09";
+          return selectedBudgetMonth === currentYearMonth;
         }
         return b.bulan === selectedBudgetMonth;
       });
@@ -710,8 +718,7 @@
     }
 
     window.renderKalender = function() {
-      const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      document.getElementById("labelBulanTahun").innerText = `${namaBulan[kalenderBulan]} ${kalenderTahun}`;
+      document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
 
       const grid = document.getElementById("gridKalender");
       grid.innerHTML = "";
@@ -750,8 +757,7 @@
 
         grid.innerHTML += `
           <div onclick="pilihTanggalKalender('${dateStr}')" class="h-9 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all ${bgClass}">
-            <span class="text-xs leading-none">${day}</span>
-            ${dotsHtml}
+            <span class="text-xs leading-none">${day}</span>${dotsHtml}
           </div>
         `;
       }
@@ -775,8 +781,7 @@
       selectedBudgetMonthIndex = mIndex;
       tutupModalFilterBulanAnggaran();
       
-      const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulan[selectedBudgetMonthIndex]} ${selectedBudgetYear}`;
+      document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       
       recalculateAndRender();
     }
@@ -867,7 +872,7 @@
 
             <div class="flex justify-between items-center text-xs pt-1">
               <span class="text-slate-500 font-medium">Sisa: <strong class="text-slate-800">${formatRp(sisa)}</strong></span>
-              <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}', ${item.limit})" class="text-[#009666] font-bold hover:underline flex items-center gap-1"><i class="bi bi-pencil-fill text-[10px]"></i> Edit</button>
+              <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}',${item.limit})" class="text-[#009666] font-bold hover:underline flex items-center gap-1"><i class="bi bi-pencil-fill text-[10px]"></i> Edit</button>
             </div>
           </div>
         `;
@@ -893,7 +898,7 @@
         } else {
           select.innerHTML = `<option value="" disabled selected>Pilih Kategori Anggaran</option>`;
           cachedAppData.anggaran.forEach(item => {
-            select.innerHTML += `<option value="${item.kategori}">${item.kategori} (Sisa ${formatRp(item.limit - item.terpakai)})</option>`;
+            select.innerHTML += `<option value="${item.kategori}">${item.kategori} (Sisa${formatRp(item.limit - item.terpakai)})</option>`;
           });
         }
       } else {
