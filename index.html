@@ -618,7 +618,7 @@
       const mmBudget = String(selectedBudgetMonthIndex + 1).padStart(2, '0');
       const selectedBudgetMonth = `${selectedBudgetYear}-${mmBudget}`;
 
-      // PERBAIKAN FILTER: Data lama yang belum punya field bulan dianggap milik September 2026 secara default
+      // Pemisahan anggaran yang sangat ketat: Data lama tanpa field bulan masuk ke September 2026, bulan lain mandiri
       let filteredBudgets = allBudgets.filter(b => {
         let bBulan = b.bulan ? b.bulan : "2026-09";
         return bBulan === selectedBudgetMonth;
