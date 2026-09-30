@@ -86,7 +86,7 @@
           <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
           <div>
             <h1 class="font-bold text-slate-800 text-base tracking-tight leading-none">Simpendi</h1>
-            <span class="text-xs text-slate-400 font-medium">Keuangan Pintar</span>
+            <span class="text-[11px] text-slate-400 font-semibold" id="txtTanggalHeader">Memuat tanggal...</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -513,6 +513,11 @@
     const namaBulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
     document.addEventListener("DOMContentLoaded", () => {
+      // Tampilkan tanggal hari ini secara otomatis di Header menggantikan "Keuangan Pintar"
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const tanggalHariIni = new Date().toLocaleDateString('id-ID', options);
+      document.getElementById("txtTanggalHeader").innerText = tanggalHariIni;
+
       document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
     });
@@ -598,7 +603,6 @@
       allTransactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
       let formattedRiwayat = allTransactions.map((item, idx) => {
-        // PERUBAHAN UTAMA: Saldo dihitung khusus berdasarkan transaksi bulan berjalan (otomatis reset tiap bulan)
         if(item.tanggal && item.tanggal.startsWith(currentYearMonth)) {
           if(item.jenis === "Pemasukan") {
             pemasukanBulanIni += Number(item.jumlah);
