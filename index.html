@@ -491,11 +491,11 @@
   <!-- FIREBASE SDK & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAjB1THZQv410ZWQDJ3OI-yXh21RxX14rI",
+      apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
       authDomain: "simpendi-001.firebaseapp.com",
       projectId: "simpendi-001",
       storageBucket: "simpendi-001.firebasestorage.app",
@@ -508,9 +508,9 @@
     const auth = getAuth(app);
 
     window.db = db;
-    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc };
+    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where };
 
-    let currentUser = "Admin";
+    let currentUser = "";
     let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
     let currentFilterJenis = "Semua";
     let dataRiwayatLengkap = []; 
@@ -547,6 +547,7 @@
           document.getElementById("halamanAppContainer").style.display = "flex";
           loadData();
         } else {
+          currentUser = "";
           document.getElementById("halamanLogin").style.display = "flex";
           document.getElementById("halamanAppContainer").style.display = "none";
         }
@@ -654,13 +655,17 @@
 
     async function loadData() {
       try {
-        const snapshotTransaksi = await getDocs(collection(db, "transaksi"));
+        // Ambil data transaksi khusus user yang sedang login
+        const qTransaksi = query(collection(db, "transaksi"), where("user", "==", currentUser));
+        const snapshotTransaksi = await getDocs(qTransaksi);
         allTransactions = [];
         snapshotTransaksi.forEach((docItem) => {
           allTransactions.push({ id: docItem.id, ...docItem.data() });
         });
 
-        const snapshotAnggaran = await getDocs(collection(db, "anggaran"));
+        // Ambil data anggaran khusus user yang sedang login
+        const qAnggaran = query(collection(db, "anggaran"), where("user", "==", currentUser));
+        const snapshotAnggaran = await getDocs(qAnggaran);
         allBudgets = [];
         snapshotAnggaran.forEach((docItem) => {
           allBudgets.push({ id: docItem.id, ...docItem.data() });
