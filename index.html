@@ -491,24 +491,24 @@
   <!-- FIREBASE SDK & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyAjB1THZQv410ZWQDJ3OI-yXh21RxX14rI",
-  authDomain: "simpendi-001.firebaseapp.com",
-  projectId: "simpendi-001",
-  storageBucket: "simpendi-001.firebasestorage.app",
-  messagingSenderId: "969874020367",
-  appId: "1:969874020367:web:3c9245e3544616e220ab7a"
-};
+      apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
+      authDomain: "simpendi-001.firebaseapp.com",
+      projectId: "simpendi-001",
+      storageBucket: "simpendi-001.firebasestorage.app",
+      messagingSenderId: "969874020367",
+      appId: "1:969874020367:web:3c9245e3544616e220ab7a"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
     window.db = db;
-    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where };
+    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc };
 
     let currentUser = "";
     let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
@@ -655,20 +655,24 @@
 
     async function loadData() {
       try {
-        // Ambil data transaksi khusus user yang sedang login
-        const qTransaksi = query(collection(db, "transaksi"), where("user", "==", currentUser));
-        const snapshotTransaksi = await getDocs(qTransaksi);
+        // Ambil semua data transaksi, lalu filter untuk user ini ATAU data lama berlabel "Admin"
+        const snapshotTransaksi = await getDocs(collection(db, "transaksi"));
         allTransactions = [];
         snapshotTransaksi.forEach((docItem) => {
-          allTransactions.push({ id: docItem.id, ...docItem.data() });
+          let data = docItem.data();
+          if (data.user === currentUser || data.user === "Admin" || !data.user) {
+            allTransactions.push({ id: docItem.id, ...data });
+          }
         });
 
-        // Ambil data anggaran khusus user yang sedang login
-        const qAnggaran = query(collection(db, "anggaran"), where("user", "==", currentUser));
-        const snapshotAnggaran = await getDocs(qAnggaran);
+        // Ambil semua data anggaran, lalu filter untuk user ini ATAU data lama berlabel "Admin"
+        const snapshotAnggaran = await getDocs(collection(db, "anggaran"));
         allBudgets = [];
         snapshotAnggaran.forEach((docItem) => {
-          allBudgets.push({ id: docItem.id, ...docItem.data() });
+          let data = docItem.data();
+          if (data.user === currentUser || data.user === "Admin" || !data.user) {
+            allBudgets.push({ id: docItem.id, ...data });
+          }
         });
 
         recalculateAndRender();
@@ -1281,6 +1285,8 @@
       
       const mmBudget = String(selectedBudgetMonthIndex + 1).padStart(2, '0');
       const activeMonth = `${selectedBudgetYear}-${mmBudget}`;
+      
+      String(selectedBudgetMonthIndex + 1).padStart(2, '0');
       
       try {
         if(docId) {
