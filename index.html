@@ -28,18 +28,7 @@
       body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; }
       .app-container { max-width: 420px !important; height: 90vh !important; max-height: 850px; border-radius: 32px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 6px solid #1e293b; }
     }
-    #halamanLogin { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #ffffff; position: absolute; z-index: 60; }
-    .login-container { width: 100%; padding: 32px; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
-    .logo-group { display: flex; align-items: center; margin-bottom: 24px; }
-    .logo-icon { background: #009666; color: #ffffff; font-weight: 700; font-size: 1.2em; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 14px; margin-right: 14px; }
-    .logo-text { font-size: 1.4em; font-weight: 700; color: #0f172a; margin: 0; }
-    .form-header h1 { font-size: 1.5em; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
-    .form-header p { font-size: 0.8em; color: #64748b; margin: 0 0 20px 0; }
-    .login-form { display: flex; flex-direction: column; gap: 14px; }
-    .login-form input { padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9em; outline: none; background: #f8fafc; color: #1e293b; }
-    .login-form input:focus { border-color: #009666; background: #ffffff; }
-    .login-form button { padding: 14px; background: #009666; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95em; font-weight: 600; cursor: pointer; }
-    #halamanAppContainer { display: none; width: 100%; height: 100%; background-color: #ffffff; flex-direction: column; position: relative; }
+    #halamanAppContainer { display: flex; width: 100%; height: 100%; background-color: #ffffff; flex-direction: column; position: relative; }
     .app-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 120px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
     .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-top: 1px solid #f1f5f9; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 24px 0; height: 75px; z-index: 50; }
     .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.33%; }
@@ -57,32 +46,6 @@
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none flex flex-col gap-2 w-max max-w-[90%]"></div>
 
-    <!-- LOGIN / REGISTER -->
-    <div id="halamanLogin">
-      <div class="login-container">
-          <div class="logo-group">
-            <span class="logo-icon"><i class="bi bi-wallet2"></i></span>
-            <span class="logo-text">Simpendi</span>
-          </div>
-          <div class="form-header">
-            <h1 id="judulAuth">Masuk Aplikasi</h1>
-            <p id="subjudulAuth">Masukkan akun Firebase Authentication Anda.</p>
-          </div>
-          <form class="login-form" id="formLogin" onsubmit="event.preventDefault(); prosesAuth();">
-              <input type="email" id="emailLogin" placeholder="Email (contoh: nama@gmail.com)" required autocomplete="off">
-              <input type="password" id="passwordLogin" placeholder="Kata Sandi (minimal 6 karakter)" required>
-              <button type="submit" id="btnLogin">Masuk</button>
-              
-              <div class="flex justify-between items-center text-xs pt-1">
-                <span id="teksToggleAuth" class="text-slate-500">Belum punya akun?</span>
-                <button type="button" onclick="toggleModeAuth()" id="btnToggleAuth" class="text-[#009666] font-bold hover:underline">Daftar Akun Baru</button>
-              </div>
-
-              <div id="pesanLogin" class="text-rose-500 text-center text-xs font-semibold h-4 mt-1"></div>
-          </form>
-      </div>
-    </div>
-
     <!-- APLIKASI UTAMA -->
     <div id="halamanAppContainer" class="flex flex-col h-full">
       
@@ -96,9 +59,6 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Keluar">
-            <i class="bi bi-box-arrow-right text-sm"></i>
-          </button>
           <button onclick="bukaModalTransaksi()" class="bg-[#009666] hover:bg-[#007d55] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
             <i class="bi bi-plus-lg text-sm"></i>
             <span>Transaksi</span>
@@ -492,32 +452,25 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyAjB1THZQv410ZWQDJ3OI-yXh21RxX14rI",
-  authDomain: "simpendi-001.firebaseapp.com",
-  projectId: "simpendi-001",
-  storageBucket: "simpendi-001.firebasestorage.app",
-  messagingSenderId: "969874020367",
-  appId: "1:969874020367:web:3c9245e3544616e220ab7a"
-};
+      apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
+      authDomain: "simpendi-001.firebaseapp.com",
+      projectId: "simpendi-001",
+      storageBucket: "simpendi-001.firebasestorage.app",
+      messagingSenderId: "969874020367",
+      appId: "1:969874020367:web:3c9245e3544616e220ab7a"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
 
-    window.db = db;
-    window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc };
-
-    let currentUser = "";
     let cachedAppData = { dashboard: { saldo: 0, pemasukan: 0, pengeluaran: 0, riwayat: [] }, anggaran: [] };
     let currentFilterJenis = "Semua";
     let dataRiwayatLengkap = []; 
     let allTransactions = [];
     let allBudgets = [];
     let currentDetailItem = null;
-    let isRegisterMode = false;
 
     // State Kalender
     const initDate = new Date();
@@ -540,89 +493,8 @@
       document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user.email;
-          document.getElementById("halamanLogin").style.display = "none";
-          document.getElementById("halamanAppContainer").style.display = "flex";
-          loadData();
-        } else {
-          currentUser = "";
-          document.getElementById("halamanLogin").style.display = "flex";
-          document.getElementById("halamanAppContainer").style.display = "none";
-        }
-      });
+      loadData();
     });
-
-    window.toggleModeAuth = function() {
-      isRegisterMode = !isRegisterMode;
-      const judul = document.getElementById("judulAuth");
-      const sub = document.getElementById("subjudulAuth");
-      const btn = document.getElementById("btnLogin");
-      const teksToggle = document.getElementById("teksToggleAuth");
-      const btnToggle = document.getElementById("btnToggleAuth");
-      document.getElementById("pesanLogin").innerText = "";
-
-      if(isRegisterMode) {
-        judul.innerText = "Daftar Akun Baru";
-        sub.innerText = "Buat akun baru untuk langsung masuk aplikasi.";
-        btn.innerText = "Daftar Akun";
-        teksToggle.innerText = "Sudah punya akun?";
-        btnToggle.innerText = "Masuk di sini";
-      } else {
-        judul.innerText = "Masuk Aplikasi";
-        sub.innerText = "Masukkan akun Firebase Authentication Anda.";
-        btn.innerText = "Masuk";
-        teksToggle.innerText = "Belum punya akun?";
-        btnToggle.innerText = "Daftar Akun Baru";
-      }
-    }
-
-    window.prosesAuth = async function() {
-      const email = document.getElementById("emailLogin").value;
-      const pass = document.getElementById("passwordLogin").value;
-      const btn = document.getElementById("btnLogin");
-      const pesan = document.getElementById("pesanLogin");
-      
-      btn.disabled = true;
-      btn.innerText = "Memproses...";
-      pesan.innerText = "";
-      
-      try {
-        if(isRegisterMode) {
-          await createUserWithEmailAndPassword(auth, email, pass);
-          showToast("Akun berhasil dibuat dan masuk!", "success");
-        } else {
-          await signInWithEmailAndPassword(auth, email, pass);
-          showToast("Berhasil masuk!", "success");
-        }
-      } catch(err) {
-        console.error(err);
-        btn.disabled = false;
-        btn.innerText = isRegisterMode ? "Daftar Akun" : "Masuk";
-        
-        if(err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-          pesan.innerText = "Email atau kata sandi salah!";
-        } else if(err.code === 'auth/email-already-in-use') {
-          pesan.innerText = "Email sudah terdaftar, silakan langsung masuk!";
-        } else if(err.code === 'auth/weak-password') {
-          pesan.innerText = "Kata sandi terlalu lemah (minimal 6 karakter)!";
-        } else {
-          pesan.innerText = `Gagal: ${err.message}`;
-        }
-      }
-    }
-
-    window.prosesLogout = async function() {
-      if (confirm("Keluar dari aplikasi?")) {
-        try {
-          await signOut(auth);
-          showToast("Berhasil keluar", "success");
-        } catch(err) {
-          console.error(err);
-        }
-      }
-    }
 
     const formatRp = (angka) => {
       let isNegative = angka < 0;
@@ -655,24 +527,16 @@
 
     async function loadData() {
       try {
-        // Ambil semua data transaksi, lalu filter untuk user ini ATAU data lama berlabel "Admin"
         const snapshotTransaksi = await getDocs(collection(db, "transaksi"));
         allTransactions = [];
         snapshotTransaksi.forEach((docItem) => {
-          let data = docItem.data();
-          if (data.user === currentUser || data.user === "Admin" || !data.user) {
-            allTransactions.push({ id: docItem.id, ...data });
-          }
+          allTransactions.push({ id: docItem.id, ...docItem.data() });
         });
 
-        // Ambil semua data anggaran, lalu filter untuk user ini ATAU data lama berlabel "Admin"
         const snapshotAnggaran = await getDocs(collection(db, "anggaran"));
         allBudgets = [];
         snapshotAnggaran.forEach((docItem) => {
-          let data = docItem.data();
-          if (data.user === currentUser || data.user === "Admin" || !data.user) {
-            allBudgets.push({ id: docItem.id, ...data });
-          }
+          allBudgets.push({ id: docItem.id, ...docItem.data() });
         });
 
         recalculateAndRender();
@@ -1203,7 +1067,7 @@
           showToast("Transaksi berhasil diperbarui!", "success");
         } else {
           await addDoc(collection(db, "transaksi"), {
-            user: currentUser,
+            user: "Admin",
             jenis: jenisVal,
             jumlah: Number(jumlahBersih),
             kategori: kategoriInput,
@@ -1286,8 +1150,6 @@
       const mmBudget = String(selectedBudgetMonthIndex + 1).padStart(2, '0');
       const activeMonth = `${selectedBudgetYear}-${mmBudget}`;
       
-      String(selectedBudgetMonthIndex + 1).padStart(2, '0');
-      
       try {
         if(docId) {
           await updateDoc(doc(db, "anggaran", docId), {
@@ -1297,7 +1159,7 @@
           });
         } else {
           await addDoc(collection(db, "anggaran"), {
-            user: currentUser,
+            user: "Admin",
             kategori: kategoriBaru,
             limit: Number(limitBersih),
             bulan: activeMonth
