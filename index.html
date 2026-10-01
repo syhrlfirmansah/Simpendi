@@ -30,13 +30,13 @@
     }
     #halamanLogin { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #ffffff; position: absolute; z-index: 60; }
     .login-container { width: 100%; padding: 32px; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
-    .logo-group { display: flex; align-items: center; margin-bottom: 32px; }
+    .logo-group { display: flex; align-items: center; margin-bottom: 24px; }
     .logo-icon { background: #009666; color: #ffffff; font-weight: 700; font-size: 1.2em; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 14px; margin-right: 14px; }
     .logo-text { font-size: 1.4em; font-weight: 700; color: #0f172a; margin: 0; }
-    .form-header h1 { font-size: 1.6em; font-weight: 700; color: #0f172a; margin: 0 0 6px 0; }
-    .form-header p { font-size: 0.85em; color: #64748b; margin: 0 0 28px 0; }
-    .login-form { display: flex; flex-direction: column; gap: 16px; }
-    .login-form input { padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95em; outline: none; background: #f8fafc; color: #1e293b; }
+    .form-header h1 { font-size: 1.5em; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
+    .form-header p { font-size: 0.8em; color: #64748b; margin: 0 0 20px 0; }
+    .login-form { display: flex; flex-direction: column; gap: 14px; }
+    .login-form input { padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9em; outline: none; background: #f8fafc; color: #1e293b; }
     .login-form input:focus { border-color: #009666; background: #ffffff; }
     .login-form button { padding: 14px; background: #009666; color: #ffffff; border: none; border-radius: 12px; font-size: 0.95em; font-weight: 600; cursor: pointer; }
     #halamanAppContainer { display: none; width: 100%; height: 100%; background-color: #ffffff; flex-direction: column; position: relative; }
@@ -57,7 +57,7 @@
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none flex flex-col gap-2 w-max max-w-[90%]"></div>
 
-    <!-- LOGIN -->
+    <!-- LOGIN / REGISTER -->
     <div id="halamanLogin">
       <div class="login-container">
           <div class="logo-group">
@@ -65,14 +65,20 @@
             <span class="logo-text">Simpendi</span>
           </div>
           <div class="form-header">
-            <h1>Masuk Aplikasi</h1>
-            <p>Masukkan akun Firebase Authentication Anda.</p>
+            <h1 id="judulAuth">Masuk Aplikasi</h1>
+            <p id="subjudulAuth">Masukkan akun Firebase Authentication Anda.</p>
           </div>
-          <form class="login-form" id="formLogin" onsubmit="event.preventDefault(); prosesLogin();">
-              <input type="email" id="emailLogin" placeholder="Email (contoh: admin@simpendi.com)" required autocomplete="off">
-              <input type="password" id="passwordLogin" placeholder="Kata Sandi" required>
+          <form class="login-form" id="formLogin" onsubmit="event.preventDefault(); prosesAuth();">
+              <input type="email" id="emailLogin" placeholder="Email (contoh: nama@gmail.com)" required autocomplete="off">
+              <input type="password" id="passwordLogin" placeholder="Kata Sandi (minimal 6 karakter)" required>
               <button type="submit" id="btnLogin">Masuk</button>
-              <div id="pesanLogin" class="text-rose-500 text-center text-xs font-semibold h-4"></div>
+              
+              <div class="flex justify-between items-center text-xs pt-1">
+                <span id="teksToggleAuth" class="text-slate-500">Belum punya akun?</span>
+                <button type="button" onclick="toggleModeAuth()" id="btnToggleAuth" class="text-[#009666] font-bold hover:underline">Daftar Akun Baru</button>
+              </div>
+
+              <div id="pesanLogin" class="text-rose-500 text-center text-xs font-semibold h-4 mt-1"></div>
           </form>
       </div>
     </div>
@@ -486,7 +492,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
@@ -511,6 +517,7 @@
     let allTransactions = [];
     let allBudgets = [];
     let currentDetailItem = null;
+    let isRegisterMode = false;
 
     // State Kalender
     const initDate = new Date();
@@ -533,7 +540,6 @@
       document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
 
-      // Pantau status login secara otomatis via Firebase Auth
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user.email;
@@ -547,22 +553,62 @@
       });
     });
 
-    window.prosesLogin = async function() {
+    window.toggleModeAuth = function() {
+      isRegisterMode = !isRegisterMode;
+      const judul = document.getElementById("judulAuth");
+      const sub = document.getElementById("subjudulAuth");
+      const btn = document.getElementById("btnLogin");
+      const teksToggle = document.getElementById("teksToggleAuth");
+      const btnToggle = document.getElementById("btnToggleAuth");
+      document.getElementById("pesanLogin").innerText = "";
+
+      if(isRegisterMode) {
+        judul.innerText = "Daftar Akun Baru";
+        sub.innerText = "Buat akun baru untuk langsung masuk aplikasi.";
+        btn.innerText = "Daftar Akun";
+        teksToggle.innerText = "Sudah punya akun?";
+        btnToggle.innerText = "Masuk di sini";
+      } else {
+        judul.innerText = "Masuk Aplikasi";
+        sub.innerText = "Masukkan akun Firebase Authentication Anda.";
+        btn.innerText = "Masuk";
+        teksToggle.innerText = "Belum punya akun?";
+        btnToggle.innerText = "Daftar Akun Baru";
+      }
+    }
+
+    window.prosesAuth = async function() {
       const email = document.getElementById("emailLogin").value;
       const pass = document.getElementById("passwordLogin").value;
       const btn = document.getElementById("btnLogin");
+      const pesan = document.getElementById("pesanLogin");
       
       btn.disabled = true;
       btn.innerText = "Memproses...";
+      pesan.innerText = "";
       
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        showToast("Berhasil masuk!", "success");
+        if(isRegisterMode) {
+          await createUserWithEmailAndPassword(auth, email, pass);
+          showToast("Akun berhasil dibuat dan masuk!", "success");
+        } else {
+          await signInWithEmailAndPassword(auth, email, pass);
+          showToast("Berhasil masuk!", "success");
+        }
       } catch(err) {
         console.error(err);
-        document.getElementById("pesanLogin").innerText = "Email atau kata sandi salah!";
         btn.disabled = false;
-        btn.innerText = "Masuk";
+        btn.innerText = isRegisterMode ? "Daftar Akun" : "Masuk";
+        
+        if(err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+          pesan.innerText = "Email atau kata sandi salah!";
+        } else if(err.code === 'auth/email-already-in-use') {
+          pesan.innerText = "Email sudah terdaftar, silakan langsung masuk!";
+        } else if(err.code === 'auth/weak-password') {
+          pesan.innerText = "Kata sandi terlalu lemah (minimal 6 karakter)!";
+        } else {
+          pesan.innerText = `Gagal: ${err.message}`;
+        }
       }
     }
 
