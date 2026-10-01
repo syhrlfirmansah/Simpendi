@@ -43,3 +43,24 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
+window.prosesLogin = async function() {
+      const email = document.getElementById("emailLogin").value;
+      const pass = document.getElementById("passwordLogin").value;
+      const btn = document.getElementById("btnLogin");
+      
+      btn.disabled = true;
+      btn.innerText = "Memproses...";
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showToast("Berhasil masuk!", "success");
+      } catch(err) {
+        console.error("Error detail:", err.code, err.message);
+        // Menampilkan pesan error asli dari Firebase ke layar
+        document.getElementById("pesanLogin").innerText = `Gagal: ${err.code}`;
+        showToast(`Error: ${err.message}`, "error");
+        btn.disabled = false;
+        btn.innerText = "Masuk";
+      }
+    }
