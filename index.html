@@ -56,10 +56,10 @@
         </div>
         <div>
           <h1 class="font-bold text-slate-800 text-lg">Admin Simpendi</h1>
-          <p class="text-xs text-slate-400 mt-1">Masukkan kata sandi super admin untuk mengakses aplikasi.</p>
+          <p class="text-xs text-slate-400 mt-1">Kata sandi sudah terisi otomatis, silakan klik masuk.</p>
         </div>
         <form onsubmit="event.preventDefault(); prosesLoginAdmin();" class="space-y-3 pt-2">
-          <input type="password" id="inputSandiAdmin" placeholder="Kata Sandi Admin (admin123)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-[#009666]" required>
+          <input type="password" id="inputSandiAdmin" value="admin123" placeholder="Kata Sandi Admin" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-[#009666]" required>
           <button type="submit" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-3.5 rounded-xl text-xs shadow-sm transition-all active:scale-95">Masuk Super Admin</button>
           <div id="pesanErrorLogin" class="text-rose-500 text-xs font-semibold h-4"></div>
         </form>
@@ -530,18 +530,16 @@
       const sandiInput = document.getElementById("inputSandiAdmin").value;
       const pesanError = document.getElementById("pesanErrorLogin");
       
-      // Kata sandi admin (bisa diubah di sini jika diinginkan)
       const sandiRahasia = "admin123";
 
       if (sandiInput === sandiRahasia) {
         localStorage.setItem("simpendi_admin_auth", "true");
         document.getElementById("halamanLoginAdmin").style.display = "none";
-        document.getElementById("inputSandiAdmin").value = "";
         pesanError.innerText = "";
         loadData();
         showToast("Berhasil masuk sebagai Admin", "success");
       } else {
-        pesanError.innerText = "Kata sandi salah! (Coba: admin123)";
+        pesanError.innerText = "Kata sandi salah!";
       }
     }
 
@@ -549,7 +547,6 @@
       if (confirm("Keluar dari sesi admin dan refresh database?")) {
         localStorage.removeItem("simpendi_admin_auth");
         document.getElementById("halamanLoginAdmin").style.display = "flex";
-        document.getElementById("inputSandiAdmin").value = "";
         showToast("Sesi diakhiri & database disegarkan", "success");
       }
     }
