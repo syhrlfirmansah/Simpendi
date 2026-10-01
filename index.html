@@ -66,11 +66,11 @@
           </div>
           <div class="form-header">
             <h1>Masuk Aplikasi</h1>
-            <p>Silakan masukkan akun Anda untuk melanjutkan.</p>
+            <p>Masukkan akun Firebase Authentication Anda.</p>
           </div>
           <form class="login-form" id="formLogin" onsubmit="event.preventDefault(); prosesLogin();">
-              <input type="text" id="username" placeholder="Username (admin)" required autocomplete="off" value="admin">
-              <input type="password" id="password" placeholder="Kata Sandi" required value="admin123">
+              <input type="email" id="emailLogin" placeholder="Email (contoh: admin@simpendi.com)" required autocomplete="off">
+              <input type="password" id="passwordLogin" placeholder="Kata Sandi" required>
               <button type="submit" id="btnLogin">Masuk</button>
               <div id="pesanLogin" class="text-rose-500 text-center text-xs font-semibold h-4"></div>
           </form>
@@ -486,6 +486,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAJb1THZQv410ZWQDJ3OI-yXh21RxX14rI",
@@ -498,6 +499,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     window.db = db;
     window.dbOperations = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc };
@@ -530,7 +532,50 @@
 
       document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
+
+      // Pantau status login secara otomatis via Firebase Auth
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user.email;
+          document.getElementById("halamanLogin").style.display = "none";
+          document.getElementById("halamanAppContainer").style.display = "flex";
+          loadData();
+        } else {
+          document.getElementById("halamanLogin").style.display = "flex";
+          document.getElementById("halamanAppContainer").style.display = "none";
+        }
+      });
     });
+
+    window.prosesLogin = async function() {
+      const email = document.getElementById("emailLogin").value;
+      const pass = document.getElementById("passwordLogin").value;
+      const btn = document.getElementById("btnLogin");
+      
+      btn.disabled = true;
+      btn.innerText = "Memproses...";
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showToast("Berhasil masuk!", "success");
+      } catch(err) {
+        console.error(err);
+        document.getElementById("pesanLogin").innerText = "Email atau kata sandi salah!";
+        btn.disabled = false;
+        btn.innerText = "Masuk";
+      }
+    }
+
+    window.prosesLogout = async function() {
+      if (confirm("Keluar dari aplikasi?")) {
+        try {
+          await signOut(auth);
+          showToast("Berhasil keluar", "success");
+        } catch(err) {
+          console.error(err);
+        }
+      }
+    }
 
     const formatRp = (angka) => {
       let isNegative = angka < 0;
@@ -559,26 +604,6 @@
         toast.classList.add('translate-y-[-15px]', 'opacity-0');
         setTimeout(() => { container.removeChild(toast); }, 300);
       }, 3000);
-    }
-
-    window.prosesLogin = function() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      if(user && pass) {
-        currentUser = user;
-        document.getElementById("halamanLogin").style.display = "none";
-        document.getElementById("halamanAppContainer").style.display = "flex";
-        loadData();
-        showToast("Berhasil masuk ke aplikasi!", "success");
-      } else {
-        document.getElementById("pesanLogin").innerText = "Masukkan username & password!";
-      }
-    }
-
-    window.prosesLogout = function() {
-      if (confirm("Keluar dari aplikasi?")) {
-        location.reload();
-      }
     }
 
     async function loadData() {
