@@ -13,13 +13,8 @@
   
   <title>Simpendi</title>
   
-  <!-- Tailwind CSS & Dark Mode Config -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Bootstrap Icons -->
@@ -28,7 +23,7 @@
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     body, html { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #0f172a; width: 100%; height: 100%; overflow: hidden; }
-    .app-container { width: 100%; height: 100%; max-width: 100%; margin: 0; background: #ffffff; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+    .app-container { width: 100%; height: 100%; max-width: 100%; margin: 0; background: #ffffff; display: flex; flex-direction: column; position: relative; overflow: hidden; }
     @media (min-width: 768px) {
       body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; }
       .app-container { max-width: 420px !important; height: 90vh !important; max-height: 850px; border-radius: 32px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 6px solid #1e293b; }
@@ -63,19 +58,19 @@
     <div id="toastContainer" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-[200] pointer-events-none flex flex-col gap-2 w-max max-w-[90%]"></div>
 
     <!-- LOGIN -->
-    <div id="halamanLogin" class="dark:bg-slate-900">
+    <div id="halamanLogin">
       <div class="login-container">
           <div class="logo-group">
             <span class="logo-icon"><i class="bi bi-wallet2"></i></span>
-            <span class="logo-text dark:text-white">Simpendi</span>
+            <span class="logo-text">Simpendi</span>
           </div>
           <div class="form-header">
-            <h1 class="dark:text-white">Masuk Aplikasi</h1>
-            <p class="dark:text-slate-400">Silakan masukkan akun Anda untuk melanjutkan.</p>
+            <h1>Masuk Aplikasi</h1>
+            <p>Silakan masukkan akun Anda untuk melanjutkan.</p>
           </div>
           <form class="login-form" id="formLogin" onsubmit="event.preventDefault(); prosesLogin();">
-              <input type="text" id="username" class="dark:bg-slate-800 dark:border-slate-700 dark:text-white" placeholder="Username (admin)" required autocomplete="off" value="admin">
-              <input type="password" id="password" class="dark:bg-slate-800 dark:border-slate-700 dark:text-white" placeholder="Kata Sandi" required value="admin123">
+              <input type="text" id="username" placeholder="Username (admin)" required autocomplete="off" value="admin">
+              <input type="password" id="password" placeholder="Kata Sandi" required value="admin123">
               <button type="submit" id="btnLogin">Masuk</button>
               <div id="pesanLogin" class="text-rose-500 text-center text-xs font-semibold h-4"></div>
           </form>
@@ -83,26 +78,22 @@
     </div>
 
     <!-- APLIKASI UTAMA -->
-    <div id="halamanAppContainer" class="flex flex-col h-full dark:bg-slate-900 dark:text-slate-100">
+    <div id="halamanAppContainer" class="flex flex-col h-full">
       
       <!-- Top Bar -->
-      <div class="bg-white dark:bg-slate-900 px-4 pb-3 flex justify-between items-center border-b border-slate-100 dark:border-slate-800 sticky top-0 z-30 shadow-sm" style="padding-top: max(env(safe-area-inset-top), 16px);">
+      <div class="bg-white px-4 pb-3 flex justify-between items-center border-b border-slate-100 sticky top-0 z-30 shadow-sm" style="padding-top: max(env(safe-area-inset-top), 16px);">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#009666] flex items-center justify-center font-bold text-base"><i class="bi bi-wallet2"></i></div>
           <div>
-            <h1 class="font-bold text-slate-800 dark:text-white text-base tracking-tight leading-none">Simpendi</h1>
+            <h1 class="font-bold text-slate-800 text-base tracking-tight leading-none">Simpendi</h1>
             <span class="text-[11px] text-slate-400 font-semibold" id="txtTanggalHeader">Memuat tanggal...</span>
           </div>
         </div>
-        <div class="flex items-center gap-1.5">
-          <!-- Tombol Toggle Dark Mode -->
-          <button onclick="toggleDarkMode()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Ganti Tema">
-            <i class="bi bi-moon-fill text-sm" id="iconTema"></i>
-          </button>
-          <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-500 text-xs font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Keluar">
+        <div class="flex items-center gap-2">
+          <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-bold w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95" title="Keluar">
             <i class="bi bi-box-arrow-right text-sm"></i>
           </button>
-          <button onclick="bukaModalTransaksi()" class="bg-[#009666] hover:bg-[#007d55] text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+          <button onclick="bukaModalTransaksi()" class="bg-[#009666] hover:bg-[#007d55] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
             <i class="bi bi-plus-lg text-sm"></i>
             <span>Transaksi</span>
           </button>
@@ -124,34 +115,34 @@
           </div>
 
           <div class="grid grid-cols-3 gap-2.5">
-            <div class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
-              <div class="w-7 h-7 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-arrow-down-short"></i></div>
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+              <div class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-arrow-down-short"></i></div>
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Masuk (Bln Ini)</span>
-              <p class="font-bold text-slate-800 dark:text-slate-100 text-xs mt-1 truncate" id="txtPemasukanCard">Rp 0</p>
+              <p class="font-bold text-slate-800 text-xs mt-1 truncate" id="txtPemasukanCard">Rp 0</p>
             </div>
-            <div class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
-              <div class="w-7 h-7 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-arrow-up-short"></i></div>
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+              <div class="w-7 h-7 bg-rose-100 text-rose-600 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-arrow-up-short"></i></div>
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Keluar (Bln Ini)</span>
-              <p class="font-bold text-slate-800 dark:text-slate-100 text-xs mt-1 truncate" id="txtPengeluaranCard">Rp 0</p>
+              <p class="font-bold text-slate-800 text-xs mt-1 truncate" id="txtPengeluaranCard">Rp 0</p>
             </div>
-            <div class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
-              <div class="w-7 h-7 bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-calculator"></i></div>
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+              <div class="w-7 h-7 bg-blue-100 text-blue-600 rounded-xl mx-auto flex items-center justify-center mb-1.5 text-xs"><i class="bi bi-calculator"></i></div>
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">Sisa - Anggaran</span>
-              <p class="font-bold text-blue-600 dark:text-blue-400 text-xs mt-1 truncate" id="txtSelisihSaldoAnggaran">Rp 0</p>
+              <p class="font-bold text-blue-600 text-xs mt-1 truncate" id="txtSelisihSaldoAnggaran">Rp 0</p>
             </div>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
             <div>
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Anggaran Bulan Ini</span>
-              <p class="font-bold text-slate-800 dark:text-slate-100 text-sm mt-0.5"><span id="txtTerpakaiAnggaran">Rp 0</span> <span class="text-slate-400 font-normal">/</span> <span id="txtTotalLimitAnggaran" class="text-slate-600 dark:text-slate-300">Rp 0</span></p>
+              <p class="font-bold text-slate-800 text-sm mt-0.5"><span id="txtTerpakaiAnggaran">Rp 0</span> <span class="text-slate-400 font-normal">/</span> <span id="txtTotalLimitAnggaran" class="text-slate-600">Rp 0</span></p>
             </div>
             <button onclick="gantiTab('anggaran')" class="text-[#009666] text-xs font-bold hover:underline flex items-center gap-1">Detail <i class="bi bi-chevron-right text-xs"></i></button>
           </div>
 
           <div class="space-y-2.5 pt-1">
             <div class="flex justify-between items-center px-1">
-              <h3 class="font-bold text-slate-800 dark:text-white text-sm">Transaksi Terbaru</h3>
+              <h3 class="font-bold text-slate-800 text-sm">Transaksi Terbaru</h3>
               <button onclick="gantiTab('riwayat')" class="text-[#009666] text-xs font-bold hover:underline">Lihat Semua</button>
             </div>
             <div id="listRiwayatBeranda" class="space-y-2.5">
@@ -162,13 +153,13 @@
 
         <!-- RIWAYAT -->
         <div id="tab-riwayat" class="tab-pane hidden space-y-3.5">
-          <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="font-bold text-slate-800 dark:text-white text-base">Riwayat Transaksi</h3>
+                <h3 class="font-bold text-slate-800 text-base">Riwayat Transaksi</h3>
                 <p class="text-xs text-slate-400">Semua riwayat transaksi tercatat.</p>
               </div>
-              <button onclick="bukaModalKalender()" class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-sm transition-all active:scale-95">
+              <button onclick="bukaModalKalender()" class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm transition-all active:scale-95">
                 <i class="bi bi-calendar-event text-[#009666] text-sm"></i>
                 <span id="labelTombolFilterTanggal">Filter Tanggal</span>
               </button>
@@ -176,13 +167,13 @@
 
             <div class="relative pt-1">
               <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="bi bi-search text-sm"></i></span>
-              <input type="text" id="inputCari" oninput="renderRiwayatLengkap()" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-white outline-none focus:border-[#009666]" placeholder="Cari transaksi...">
+              <input type="text" id="inputCari" oninput="renderRiwayatLengkap()" class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 outline-none focus:border-[#009666]" placeholder="Cari transaksi...">
             </div>
 
             <div class="flex gap-1.5 overflow-x-auto pb-0.5">
               <button onclick="setFilterJenis('Semua')" id="btnFilterSemua" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0">Semua</button>
-              <button onclick="setFilterJenis('Pemasukan')" id="btnFilterMasuk" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">Masuk</button>
-              <button onclick="setFilterJenis('Pengeluaran')" id="btnFilterKeluar" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">Keluar</button>
+              <button onclick="setFilterJenis('Pemasukan')" id="btnFilterMasuk" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0">Masuk</button>
+              <button onclick="setFilterJenis('Pengeluaran')" id="btnFilterKeluar" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0">Keluar</button>
             </div>
           </div>
 
@@ -190,18 +181,18 @@
             <div class="text-center text-xs text-slate-400 py-6">Memuat riwayat...</div>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 grid grid-cols-3 gap-2 text-center">
             <div>
               <span class="text-[10px] font-bold text-slate-400 uppercase block">Masuk</span>
-              <p class="font-bold text-emerald-600 dark:text-emerald-400 text-xs mt-1 truncate" id="totalMasukFilter">Rp 0</p>
+              <p class="font-bold text-emerald-600 text-xs mt-1 truncate" id="totalMasukFilter">Rp 0</p>
             </div>
             <div>
               <span class="text-[10px] font-bold text-slate-400 uppercase block">Keluar</span>
-              <p class="font-bold text-rose-500 dark:text-rose-400 text-xs mt-1 truncate" id="totalKeluarFilter">Rp 0</p>
+              <p class="font-bold text-rose-500 text-xs mt-1 truncate" id="totalKeluarFilter">Rp 0</p>
             </div>
             <div>
               <span class="text-[10px] font-bold text-slate-400 uppercase block">Total</span>
-              <p class="font-bold text-blue-600 dark:text-blue-400 text-xs mt-1" id="totalCountFilter">0 Item</p>
+              <p class="font-bold text-blue-600 text-xs mt-1" id="totalCountFilter">0 Item</p>
             </div>
           </div>
         </div>
@@ -209,51 +200,51 @@
         <!-- ANGGARAN -->
         <div id="tab-anggaran" class="tab-pane hidden space-y-3.5">
           
-          <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3.5">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3.5">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="font-bold text-slate-800 dark:text-white text-base">Anggaran Bulanan</h3>
+                <h3 class="font-bold text-slate-800 text-base">Anggaran Bulanan</h3>
                 <p class="text-xs text-slate-400">Atur & pantau anggaran tiap bulan.</p>
               </div>
-              <button onclick="bukaModalFilterBulanAnggaran()" class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-sm transition-all active:scale-95">
+              <button onclick="bukaModalFilterBulanAnggaran()" class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 shadow-sm transition-all active:scale-95">
                 <i class="bi bi-calendar-event text-[#009666] text-sm"></i>
                 <span id="labelTombolFilterBulanAnggaran">Oktober 2026</span>
               </button>
             </div>
             
-            <div class="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900/50 p-4 rounded-2xl flex items-center justify-between">
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center justify-between">
               <div>
-                <span class="text-xs font-bold text-[#009666] dark:text-emerald-400 uppercase tracking-wider block">Sisa Anggaran Bulan Ini</span>
-                <h2 class="font-bold text-emerald-900 dark:text-emerald-200 text-lg mt-0.5" id="txtSisaAnggaranUtama">Rp 0</h2>
+                <span class="text-xs font-bold text-[#009666] uppercase tracking-wider block">Sisa Anggaran Bulan Ini</span>
+                <h2 class="font-bold text-emerald-900 text-lg mt-0.5" id="txtSisaAnggaranUtama">Rp 0</h2>
               </div>
-              <div class="w-11 h-11 bg-emerald-100 dark:bg-emerald-900/60 text-[#009666] dark:text-emerald-300 rounded-2xl flex items-center justify-center text-lg">
+              <div class="w-11 h-11 bg-emerald-100 text-[#009666] rounded-2xl flex items-center justify-center text-lg">
                 <i class="bi bi-wallet2"></i>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
-              <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div class="bg-white p-3 rounded-xl border border-slate-100">
                 <span class="text-[10px] font-bold text-slate-400 uppercase block">Total Limit</span>
-                <p class="font-bold text-slate-800 dark:text-slate-100 text-xs mt-1" id="txtTotalAnggaranGlobal">Rp 0</p>
+                <p class="font-bold text-slate-800 text-xs mt-1" id="txtTotalAnggaranGlobal">Rp 0</p>
               </div>
-              <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-right">
+              <div class="bg-white p-3 rounded-xl border border-slate-100 text-right">
                 <span class="text-[10px] font-bold text-slate-400 uppercase block">Terpakai (Bln Ini)</span>
-                <p class="font-bold text-rose-500 dark:text-rose-400 text-xs mt-1" id="txtTotalTerpakaiGlobal">Rp 0</p>
+                <p class="font-bold text-rose-500 text-xs mt-1" id="txtTotalTerpakaiGlobal">Rp 0</p>
               </div>
             </div>
           </div>
 
           <div class="space-y-2.5">
             <div class="px-1">
-              <h3 class="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider">Kategori Anggaran (Sisa Terbesar)</h3>
+              <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Kategori Anggaran (Sisa Terbesar)</h3>
             </div>
 
             <div id="listAnggaranDinamis" class="space-y-2.5">
               <div class="text-center text-xs text-slate-400 py-4">Memuat anggaran...</div>
             </div>
             
-            <div onclick="bukaFormTambahAnggaran()" class="bg-slate-50 dark:bg-slate-800/60 border border-dashed border-emerald-300 dark:border-emerald-700/60 hover:border-[#009666] p-4 rounded-2xl text-center cursor-pointer transition-all active:scale-[0.99]">
-              <span class="text-[#009666] dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5"><i class="bi bi-plus-lg text-sm"></i> Tambah Anggaran Bulan Ini</span>
+            <div onclick="bukaFormTambahAnggaran()" class="bg-slate-50 border border-dashed border-emerald-300 hover:border-[#009666] p-4 rounded-2xl text-center cursor-pointer transition-all active:scale-[0.99]">
+              <span class="text-[#009666] text-xs font-bold flex items-center justify-center gap-1.5"><i class="bi bi-plus-lg text-sm"></i> Tambah Anggaran Bulan Ini</span>
             </div>
           </div>
         </div>
@@ -261,18 +252,18 @@
       </div>
 
       <!-- MODAL KALENDER & FILTER RANGE -->
-      <div id="modalKalender" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
-        <div class="bg-white dark:bg-slate-900 dark:text-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto border dark:border-slate-800">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2.5">
-            <h3 class="font-bold text-slate-800 dark:text-white text-sm">Filter Tanggal Riwayat</h3>
-            <button onclick="tutupModalKalender()" class="text-slate-400 bg-slate-100 dark:bg-slate-800 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
+      <div id="modalKalender" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <h3 class="font-bold text-slate-800 text-sm">Filter Tanggal Riwayat</h3>
+            <button onclick="tutupModalKalender()" class="text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
-              <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
-              <span id="labelBulanTahun" class="font-bold text-slate-800 dark:text-white text-xs">Oktober 2026</span>
-              <button onclick="ubahBulanKalender(1)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
+              <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
+              <span id="labelBulanTahun" class="font-bold text-slate-800 text-xs">Oktober 2026</span>
+              <button onclick="ubahBulanKalender(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
             </div>
             
             <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 uppercase">
@@ -282,40 +273,40 @@
             <div id="gridKalender" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
           </div>
 
-          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+          <div class="pt-3 border-t border-slate-100 space-y-2.5">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Atau Pilih Rentang Tanggal</span>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Dari Tanggal</label>
-                <input type="date" id="filterStartDate" class="w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] text-slate-700 dark:text-white outline-none focus:border-[#009666]">
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Dari Tanggal</label>
+                <input type="date" id="filterStartDate" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 outline-none focus:border-[#009666]">
               </div>
               <div>
-                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Sampai Tanggal</label>
-                <input type="date" id="filterEndDate" class="w-full px-2.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] text-slate-700 dark:text-white outline-none focus:border-[#009666]">
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Sampai Tanggal</label>
+                <input type="date" id="filterEndDate" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 outline-none focus:border-[#009666]">
               </div>
             </div>
-            <button onclick="terapkanFilterRange()" class="w-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-[#009666] dark:text-emerald-300 font-bold py-2.5 rounded-xl text-xs transition-all">Terapkan Rentang</button>
+            <button onclick="terapkanFilterRange()" class="w-full bg-emerald-50 hover:bg-emerald-100 text-[#009666] font-bold py-2.5 rounded-xl text-xs transition-all">Terapkan Rentang</button>
           </div>
 
-          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex gap-2">
-            <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs">Reset / Semua Bulan</button>
+          <div class="pt-2 border-t border-slate-100 flex gap-2">
+            <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Reset / Semua Bulan</button>
           </div>
         </div>
       </div>
 
       <!-- MODAL FILTER BULAN ANGGARAN -->
-      <div id="modalFilterBulanAnggaran" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
-        <div class="bg-white dark:bg-slate-900 dark:text-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5 border dark:border-slate-800">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2.5">
-            <h3 class="font-bold text-slate-800 dark:text-white text-sm">Pilih Bulan Anggaran</h3>
-            <button onclick="tutupModalFilterBulanAnggaran()" class="text-slate-400 bg-slate-100 dark:bg-slate-800 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
+      <div id="modalFilterBulanAnggaran" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <h3 class="font-bold text-slate-800 text-sm">Pilih Bulan Anggaran</h3>
+            <button onclick="tutupModalFilterBulanAnggaran()" class="text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
-              <button onclick="ubahTahunAnggaranModal(-1)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
-              <span id="labelTahunAnggaranModal" class="font-bold text-slate-800 dark:text-white text-sm">2026</span>
-              <button onclick="ubahTahunAnggaranModal(1)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
+              <button onclick="ubahTahunAnggaranModal(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
+              <span id="labelTahunAnggaranModal" class="font-bold text-slate-800 text-sm">2026</span>
+              <button onclick="ubahTahunAnggaranModal(1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-right"></i></button>
             </div>
             
             <div id="gridBulanAnggaran" class="grid grid-cols-3 gap-2 text-xs font-semibold"></div>
@@ -324,50 +315,50 @@
       </div>
 
       <!-- MODAL TRANSAKSI -->
-      <div id="modalTransaksi" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex justify-end flex-col">
-        <div class="bg-white dark:bg-slate-900 dark:text-white w-full rounded-t-[2rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-t dark:border-slate-800">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+      <div id="modalTransaksi" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[100] flex justify-end flex-col">
+        <div class="bg-white w-full rounded-t-[2rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
             <div>
-              <h3 class="font-bold text-slate-800 dark:text-white text-base" id="judulModalTransaksi">Tambah Transaksi</h3>
+              <h3 class="font-bold text-slate-800 text-base" id="judulModalTransaksi">Tambah Transaksi</h3>
               <p class="text-xs text-slate-400">Catat pemasukan atau pengeluaran</p>
             </div>
-            <button onclick="tutupModalTransaksi()" class="text-slate-400 bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
+            <button onclick="tutupModalTransaksi()" class="text-slate-400 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <form id="formKeuangan" onsubmit="event.preventDefault(); kirimData();" class="space-y-3.5">
             <input type="hidden" id="editTransaksiDocId">
             
-            <div class="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl">
+            <div class="flex bg-slate-100 p-1.5 rounded-xl">
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="jenis" value="Pengeluaran" class="peer sr-only" checked onchange="updateDropdownKategoriOptions()">
-                <div class="text-center py-2.5 rounded-lg peer-checked:bg-white dark:peer-checked:bg-slate-900 peer-checked:shadow-sm peer-checked:text-rose-500 text-slate-400 font-bold text-xs transition-all">Pengeluaran</div>
+                <div class="text-center py-2.5 rounded-lg peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-rose-500 text-slate-400 font-bold text-xs transition-all">Pengeluaran</div>
               </label>
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="jenis" value="Pemasukan" class="peer sr-only" onchange="updateDropdownKategoriOptions()">
-                <div class="text-center py-2.5 rounded-lg peer-checked:bg-white dark:peer-checked:bg-slate-900 peer-checked:shadow-sm peer-checked:text-emerald-500 text-slate-400 font-bold text-xs transition-all">Pemasukan</div>
+                <div class="text-center py-2.5 rounded-lg peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-emerald-500 text-slate-400 font-bold text-xs transition-all">Pemasukan</div>
               </label>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nominal (Rp)</label>
-              <input type="text" inputmode="numeric" id="jumlah" oninput="formatRibuan(this)" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none font-bold text-xl text-slate-800 dark:text-white focus:border-[#009666]" placeholder="Rp 0" required>
+              <input type="text" inputmode="numeric" id="jumlah" oninput="formatRibuan(this)" class="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold text-xl text-slate-800 focus:border-[#009666] focus:bg-white" placeholder="Rp 0" required>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kategori</label>
-              <select id="kategori" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none text-xs font-medium text-slate-700 dark:text-white focus:border-[#009666]" required>
+              <select id="kategori" class="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 outline-none text-xs font-medium text-slate-700 focus:border-[#009666]" required>
                 <option value="" disabled selected>Memuat...</option>
               </select>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tanggal</label>
-              <input type="date" id="tanggal" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none text-xs font-medium text-slate-700 dark:text-white focus:border-[#009666]" required>
+              <input type="date" id="tanggal" class="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 outline-none text-xs font-medium text-slate-700 focus:border-[#009666]" required>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Akun Pembayaran / Sumber</label>
-              <select id="metode" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none text-xs font-medium text-slate-700 dark:text-white focus:border-[#009666]">
+              <select id="metode" class="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 outline-none text-xs font-medium text-slate-700 focus:border-[#009666]">
                 <option value="Tunai">Tunai / Cash</option>
                 <option value="QRIS">QRIS / Transfer Bank Umum</option>
               </select>
@@ -375,7 +366,7 @@
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Catatan (Opsional)</label>
-              <input type="text" id="keterangan" class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none text-xs font-medium text-slate-700 dark:text-white focus:border-[#009666]" placeholder="Contoh: Beli kopi">
+              <input type="text" id="keterangan" class="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 outline-none text-xs font-medium text-slate-700 focus:border-[#009666]" placeholder="Contoh: Beli kopi">
             </div>
 
             <button type="submit" id="btnSimpan" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-4 rounded-xl shadow-sm text-sm mt-2">Simpan Transaksi</button>
@@ -384,60 +375,60 @@
       </div>
 
       <!-- MODAL DETAIL TRANSAKSI -->
-      <div id="modalDetailTransaksi" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[110] flex justify-end flex-col">
-        <div class="bg-white dark:bg-slate-900 dark:text-white w-full rounded-t-[2rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border-t dark:border-slate-800">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-            <h3 class="font-bold text-slate-800 dark:text-white text-base">Detail Transaksi</h3>
-            <button onclick="tutupDetailTransaksi()" class="text-slate-400 bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
+      <div id="modalDetailTransaksi" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[110] flex justify-end flex-col">
+        <div class="bg-white w-full rounded-t-[2rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-slate-800 text-base">Detail Transaksi</h3>
+            <button onclick="tutupDetailTransaksi()" class="text-slate-400 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
           </div>
           
           <div class="text-center py-2">
             <div class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-2" id="detailIkonBg">
               <i class="bi text-2xl" id="detailIkon"></i>
             </div>
-            <h2 class="text-3xl font-bold tracking-tight text-slate-800 dark:text-white" id="detailNominal">Rp 0</h2>
+            <h2 class="text-3xl font-bold tracking-tight text-slate-800" id="detailNominal">Rp 0</h2>
             <div class="mt-2 inline-block"><span id="detailJenisBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg">...</span></div>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 space-y-3.5 border border-slate-100 dark:border-slate-800">
+          <div class="bg-slate-50 rounded-2xl p-4 space-y-3.5 border border-slate-100">
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kategori</span>
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200" id="detailKategori">...</span>
+              <span class="text-xs font-bold text-slate-700" id="detailKategori">...</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tanggal</span>
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200" id="detailTanggal">...</span>
+              <span class="text-xs font-bold text-slate-700" id="detailTanggal">...</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sumber/Akun</span>
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200" id="detailMetode">...</span>
+              <span class="text-xs font-bold text-slate-700" id="detailMetode">...</span>
             </div>
             <div class="flex justify-between items-start">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider pt-0.5">Catatan</span>
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 text-right max-w-[60%]" id="detailKeterangan">-</span>
+              <span class="text-xs font-bold text-slate-700 text-right max-w-[60%]" id="detailKeterangan">-</span>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3 pt-2">
-            <button onclick="prosesHapusTransaksi()" class="w-full py-4 rounded-xl text-rose-500 font-bold text-xs bg-rose-50 dark:bg-rose-950/50 border border-rose-100 dark:border-rose-900/50 hover:bg-rose-100 transition-all"><i class="bi bi-trash3 mr-1 text-sm"></i> Hapus</button>
-            <button onclick="bukaEditTransaksi()" class="w-full py-4 rounded-xl text-[#009666] font-bold text-xs bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900/50 hover:bg-emerald-100 transition-all"><i class="bi bi-pencil-square mr-1 text-sm"></i> Edit Data</button>
+            <button onclick="prosesHapusTransaksi()" class="w-full py-4 rounded-xl text-rose-500 font-bold text-xs bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-all"><i class="bi bi-trash3 mr-1 text-sm"></i> Hapus</button>
+            <button onclick="bukaEditTransaksi()" class="w-full py-4 rounded-xl text-[#009666] font-bold text-xs bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition-all"><i class="bi bi-pencil-square mr-1 text-sm"></i> Edit Data</button>
           </div>
         </div>
       </div>
 
       <!-- MODAL ANGGARAN -->
-      <div id="modalAnggaran" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[100] flex justify-center items-center p-4">
-        <div class="bg-white dark:bg-slate-900 dark:text-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4 border dark:border-slate-800">
-          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-            <h3 class="font-bold text-slate-800 dark:text-white text-base" id="judulModalAnggaran">Tambah Anggaran</h3>
-            <button onclick="tutupModalAnggaran()" class="text-slate-400 bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
+      <div id="modalAnggaran" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-[100] flex justify-center items-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-slate-800 text-base" id="judulModalAnggaran">Tambah Anggaran</h3>
+            <button onclick="tutupModalAnggaran()" class="text-slate-400 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center text-sm"><i class="bi bi-x-lg"></i></button>
           </div>
           <form id="formInputAnggaran" onsubmit="event.preventDefault(); prosesSimpanAnggaran();" class="space-y-3.5">
             <input type="hidden" id="editAnggaranDocId">
             
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">1. Nama Kategori</label>
-              <select id="inputKategoriBaru" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium outline-none focus:border-[#009666]" onchange="cekKategoriLainnya(this)" required>
+              <select id="inputKategoriBaru" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-[#009666]" onchange="cekKategoriLainnya(this)" required>
                 <option value="" disabled selected>Pilih Kategori Anggaran</option>
                 <option value="Makan & Minum">Makan & Minum</option>
                 <option value="Transportasi">Transportasi</option>
@@ -450,12 +441,12 @@
             
             <div id="wrapperKategoriManual" class="hidden">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Ketik Nama Kategori Lainnya</label>
-              <input type="text" id="inputKategoriManual" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium outline-none focus:border-[#009666]" placeholder="Contoh: Sedekah">
+              <input type="text" id="inputKategoriManual" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-[#009666]" placeholder="Contoh: Sedekah">
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">2. Kantong Uang</label>
-              <select id="inputKantongUang" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium outline-none focus:border-[#009666]" required>
+              <select id="inputKantongUang" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-[#009666]" required>
                 <option value="" disabled selected>Pilih Kantong Uang</option>
                 <option value="ShopeePay">ShopeePay</option>
                 <option value="Bank Jago">Bank Jago</option>
@@ -464,7 +455,7 @@
 
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">3. Anggaran (Rp)</label>
-              <input type="text" inputmode="numeric" id="inputLimitBaru" oninput="formatRibuan(this)" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold outline-none" placeholder="Rp 0" required>
+              <input type="text" inputmode="numeric" id="inputLimitBaru" oninput="formatRibuan(this)" class="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold outline-none" placeholder="Rp 0" required>
             </div>
 
             <button type="submit" class="w-full bg-[#009666] hover:bg-[#007d55] text-white font-bold py-3.5 rounded-xl shadow-sm text-xs mt-2">Simpan Anggaran</button>
@@ -473,7 +464,7 @@
       </div>
 
       <!-- BOTTOM NAV -->
-      <div class="bottom-nav dark:bg-slate-900/95 dark:border-slate-800">
+      <div class="bottom-nav">
         <div class="nav-item active" id="nav-beranda" onclick="gantiTab('beranda')">
           <i class="bi bi-house-door-fill"></i>
           <span>Beranda</span>
@@ -519,7 +510,7 @@
     let allBudgets = [];
     let currentDetailItem = null;
 
-    // State Kalender & Tema
+    // State Kalender
     const initDate = new Date();
     let kalenderTahun = initDate.getFullYear();
     let kalenderBulan = initDate.getMonth(); 
@@ -533,13 +524,6 @@
     const namaBulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
     document.addEventListener("DOMContentLoaded", () => {
-      // Inisialisasi Tema Tersimpan
-      const savedTheme = localStorage.getItem("simpendi_theme");
-      if (savedTheme === "dark") {
-        document.querySelector(".app-container").classList.add("dark");
-        document.getElementById("iconTema").className = "bi bi-sun-fill text-sm text-amber-400";
-      }
-
       const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
       const tanggalHariIni = new Date().toLocaleDateString('id-ID', options);
       document.getElementById("txtTanggalHeader").innerText = tanggalHariIni;
@@ -547,23 +531,6 @@
       document.getElementById("labelTombolFilterBulanAnggaran").innerText = `${namaBulanList[selectedBudgetMonthIndex]}${selectedBudgetYear}`;
       document.getElementById("labelBulanTahun").innerText = `${namaBulanList[kalenderBulan]}${kalenderTahun}`;
     });
-
-    window.toggleDarkMode = function() {
-      const container = document.querySelector(".app-container");
-      const icon = document.getElementById("iconTema");
-      container.classList.toggle("dark");
-
-      const isDark = container.classList.contains("dark");
-      if (isDark) {
-        localStorage.setItem("simpendi_theme", "dark");
-        icon.className = "bi bi-sun-fill text-sm text-amber-400";
-        showToast("Mode gelap diaktifkan", "success");
-      } else {
-        localStorage.setItem("simpendi_theme", "light");
-        icon.className = "bi bi-moon-fill text-sm";
-        showToast("Mode terang diaktifkan", "success");
-      }
-    }
 
     const formatRp = (angka) => {
       let isNegative = angka < 0;
@@ -578,7 +545,7 @@
       const toast = document.createElement('div');
       let icon = type === 'success' ? 'bi-check-circle-fill text-[#009666]' : 'bi-exclamation-circle-fill text-rose-500';
 
-      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold bg-slate-900/95 dark:bg-slate-800 text-white border border-slate-800 shadow-2xl backdrop-blur-md transition-all duration-300 translate-y-[-15px] opacity-0`;
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold bg-slate-900/95 text-white border border-slate-800 shadow-2xl backdrop-blur-md transition-all duration-300 translate-y-[-15px] opacity-0`;
       toast.innerHTML = `<i class="bi ${icon} text-base"></i><span>${message}</span>`;
       
       container.appendChild(toast);
@@ -829,11 +796,11 @@
         const isSelected = selectedTanggalFilter === dateStr;
         const isToday = dateStr === todayStr;
 
-        let bgClass = "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200";
+        let bgClass = "bg-slate-50 hover:bg-slate-100 text-slate-700";
         if (isSelected) {
           bgClass = "bg-[#009666] text-white font-bold shadow-sm";
         } else if (isToday) {
-          bgClass = "border-2 border-[#009666] text-[#009666] dark:text-emerald-400 font-bold bg-emerald-50/40 dark:bg-emerald-950/40";
+          bgClass = "border-2 border-[#009666] text-[#009666] font-bold bg-emerald-50/40";
         }
 
         let dotsHtml = `<div class="flex justify-center gap-0.5 mt-0.5 h-1">`;
@@ -881,7 +848,7 @@
 
       namaBulanSingkat.forEach((bName, idx) => {
         const isSelected = (idx === selectedBudgetMonthIndex);
-        let btnClass = "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3 rounded-xl transition-all border border-slate-100 dark:border-slate-800";
+        let btnClass = "bg-slate-50 hover:bg-slate-100 text-slate-700 py-3 rounded-xl transition-all border border-slate-100";
         if (isSelected) {
           btnClass = "bg-[#009666] text-white font-bold py-3 rounded-xl shadow-sm transition-all";
         }
@@ -906,7 +873,7 @@
       daftarAnggaran.sort((a, b) => b.sisa - a.sisa);
 
       if (daftarAnggaran.length === 0) {
-        kontainerAnggaran.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 dark:bg-slate-800/80 rounded-2xl">Belum ada anggaran untuk bulan ini. Silakan tambah!</div>`;
+        kontainerAnggaran.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Belum ada anggaran untuk bulan ini. Silakan tambah!</div>`;
         document.getElementById("txtTerpakaiAnggaran").innerText = formatRp(0);
         document.getElementById("txtTotalLimitAnggaran").innerText = formatRp(0);
         document.getElementById("txtTotalAnggaranGlobal").innerText = formatRp(0);
@@ -931,33 +898,33 @@
         let barWidth = persen > 100 ? 100 : persen;
         let sisa = item.sisa;
         
-        let statusBadge = persen > 100 ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md">🔴 Berlebih</span>` : 
-                          persen >= 80 ? `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">🟠 Kritis</span>` : 
-                                         `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">🟢 Aman</span>`;
+        let statusBadge = persen > 100 ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">🔴 Berlebih</span>` : 
+                          persen >= 80 ? `<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">🟠 Kritis</span>` : 
+                                         `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">🟢 Aman</span>`;
         let warnaBar = persen > 100 ? "bg-rose-500" : persen >= 80 ? "bg-amber-500" : "bg-[#009666]";
 
-        let bgIcons = ["bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400", "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400", "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400", "bg-rose-50 dark:bg-rose-950/60 text-rose-500 dark:text-rose-400"];
+        let bgIcons = ["bg-emerald-50 text-emerald-600", "bg-amber-50 text-amber-600", "bg-blue-50 text-blue-600", "bg-rose-50 text-rose-500"];
         let iconClass = bgIcons[index % bgIcons.length];
 
         kontainerAnggaran.innerHTML += `
-          <div class="bg-slate-50 dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2.5">
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-2.5">
             <div class="flex justify-between items-center">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center ${iconClass}"><i class="bi bi-wallet2 text-sm"></i></div>
                 <div>
-                  <h4 class="font-bold text-slate-800 dark:text-white text-xs">${item.kategori}</h4>
-                  <p class="text-[10px] font-medium text-slate-400 mt-0.5">Terpakai: <span class="text-slate-600 dark:text-slate-200 font-semibold">${formatRp(item.terpakai)}</span> / <span class="text-slate-600 dark:text-slate-200 font-semibold">${formatRp(item.limit)}</span></p>
+                  <h4 class="font-bold text-slate-800 text-xs">${item.kategori}</h4>
+                  <p class="text-[10px] font-medium text-slate-400 mt-0.5">Terpakai: <span class="text-slate-600 font-semibold">${formatRp(item.terpakai)}</span> / <span class="text-slate-600 font-semibold">${formatRp(item.limit)}</span></p>
                 </div>
               </div>
               <div>${statusBadge}</div>
             </div>
             
-            <div class="w-full bg-slate-200 dark:bg-slate-700/70 rounded-full h-2 overflow-hidden">
+            <div class="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
               <div class="${warnaBar} h-2 rounded-full transition-all duration-500" style="width: ${barWidth}%"></div>
             </div>
 
             <div class="flex justify-between items-center text-xs pt-1">
-              <span class="text-slate-500 dark:text-slate-400 font-medium">Sisa: <strong class="text-slate-800 dark:text-white">${formatRp(sisa)}</strong></span>
+              <span class="text-slate-500 font-medium">Sisa: <strong class="text-slate-800">${formatRp(sisa)}</strong></span>
               <button onclick="bukaModalEditAnggaran('${item.id}', '${item.kategori}',${item.limit})" class="text-[#009666] font-bold hover:underline flex items-center gap-1"><i class="bi bi-pencil-fill text-[10px]"></i> Edit</button>
             </div>
           </div>
@@ -1031,7 +998,7 @@
       document.getElementById("totalCountFilter").innerText = filtered.length + " Item";
 
       if(filtered.length === 0) {
-         container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 dark:bg-slate-800/80 rounded-2xl">Tidak ada transaksi pada periode/rentang tanggal ini.</div>`;
+         container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Tidak ada transaksi pada periode/rentang tanggal ini.</div>`;
          return;
       }
 
@@ -1041,19 +1008,19 @@
 
     function renderItemTransaksiKecil(item) {
       const isP = item.jenis === "Pemasukan";
-      const bgIcon = isP ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300";
+      const bgIcon = isP ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-600";
       const icon = isP ? "bi-wallet2" : "bi-cart3";
-      const warnaNominal = isP ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400";
+      const warnaNominal = isP ? "text-emerald-600" : "text-rose-500";
       const operator = isP ? "+" : "-"; 
       const metodeText = item.metode ? item.metode : "Tunai";
       const textKet = item.keterangan ? `<p class="text-[10px] text-slate-400 mt-0.5 truncate max-w-[150px]">${item.keterangan}</p>` : ``;
 
       return `
-        <div onclick="bukaDetailTransaksi(${item._localIdx})" class="bg-slate-50 dark:bg-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between border border-slate-100 dark:border-slate-800 cursor-pointer active:scale-[0.98] transition-all">
+        <div onclick="bukaDetailTransaksi(${item._localIdx})" class="bg-slate-50 p-3.5 rounded-2xl flex items-center justify-between border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl flex shrink-0 items-center justify-center ${bgIcon}"><i class="bi ${icon} text-sm"></i></div>
             <div>
-              <p class="font-bold text-slate-800 dark:text-white text-xs">${item.kategori}</p>
+              <p class="font-bold text-slate-800 text-xs">${item.kategori}</p>
               <p class="text-[10px] text-slate-400 mt-0.5">${item.tanggalFormatted} • ${metodeText}</p>
               ${textKet}
             </div>
@@ -1067,10 +1034,10 @@
       const isP = currentDetailItem.jenis === "Pemasukan";
       
       document.getElementById('detailNominal').innerText = (isP ? "+" : "-") + formatRp(currentDetailItem.jumlah);
-      document.getElementById('detailNominal').className = `text-3xl font-bold tracking-tight ${isP ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+      document.getElementById('detailNominal').className = `text-3xl font-bold tracking-tight ${isP ? 'text-emerald-600' : 'text-rose-600'}`;
       document.getElementById('detailJenisBadge').innerText = currentDetailItem.jenis.toUpperCase();
-      document.getElementById('detailJenisBadge').className = `text-xs font-bold px-2.5 py-1 rounded-lg ${isP ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'}`;
-      document.getElementById('detailIkonBg').className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-2 ${isP ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`;
+      document.getElementById('detailJenisBadge').className = `text-xs font-bold px-2.5 py-1 rounded-lg ${isP ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`;
+      document.getElementById('detailIkonBg').className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-2 ${isP ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`;
       document.getElementById('detailIkon').className = `bi text-2xl ${isP ? 'bi-wallet2' : 'bi-cart3'}`;
       document.getElementById('detailKategori').innerText = currentDetailItem.kategori;
       document.getElementById('detailTanggal').innerText = currentDetailItem.tanggalFormatted;
@@ -1181,9 +1148,9 @@
 
     window.setFilterJenis = function(jenis) {
       currentFilterJenis = jenis;
-      document.getElementById("btnFilterSemua").className = jenis === "Semua" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0";
-      document.getElementById("btnFilterMasuk").className = jenis === "Pemasukan" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0";
-      document.getElementById("btnFilterKeluar").className = jenis === "Pengeluaran" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0";
+      document.getElementById("btnFilterSemua").className = jenis === "Semua" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0";
+      document.getElementById("btnFilterMasuk").className = jenis === "Pemasukan" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0";
+      document.getElementById("btnFilterKeluar").className = jenis === "Pengeluaran" ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-[#009666] text-white shrink-0" : "px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 shrink-0";
       renderRiwayatLengkap();
     }
 
