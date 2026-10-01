@@ -252,14 +252,15 @@
 
       </div>
 
-      <!-- MODAL KALENDER RIWAYAT -->
+      <!-- MODAL KALENDER & FILTER RANGE RIWAYAT -->
       <div id="modalKalender" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[120] flex justify-center items-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-            <h3 class="font-bold text-slate-800 text-sm">Pilih Tanggal Riwayat</h3>
+            <h3 class="font-bold text-slate-800 text-sm">Filter Tanggal Riwayat</h3>
             <button onclick="tutupModalKalender()" class="text-slate-400 bg-slate-100 w-7 h-7 rounded-full flex items-center justify-center text-xs"><i class="bi bi-x-lg"></i></button>
           </div>
 
+          <!-- Bagian Kalender Bulanan -->
           <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
               <button onclick="ubahBulanKalender(-1)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-all"><i class="bi bi-chevron-left"></i></button>
@@ -276,8 +277,24 @@
             </div>
           </div>
 
+          <!-- Bagian Filter Rentang (Range) Tanggal A ke B -->
+          <div class="pt-3 border-t border-slate-100 space-y-2.5">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Atau Pilih Rentang Tanggal</span>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Dari Tanggal</label>
+                <input type="date" id="filterStartDate" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 outline-none focus:border-[#009666]">
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Sampai Tanggal</label>
+                <input type="date" id="filterEndDate" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 outline-none focus:border-[#009666]">
+              </div>
+            </div>
+            <button onclick="terapkanFilterRange()" class="w-full bg-emerald-50 hover:bg-emerald-100 text-[#009666] font-bold py-2.5 rounded-xl text-xs transition-all">Terapkan Rentang</button>
+          </div>
+
           <div class="pt-2 border-t border-slate-100 flex gap-2">
-            <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Semua Bulan</button>
+            <button onclick="resetFilterTanggal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Reset / Semua Bulan</button>
           </div>
         </div>
       </div>
@@ -505,6 +522,8 @@
     let kalenderTahun = initDate.getFullYear();
     let kalenderBulan = initDate.getMonth(); 
     let selectedTanggalFilter = null;
+    let selectedStartDate = null;
+    let selectedEndDate = null;
 
     // State Filter Bulan Anggaran (Otomatis Bulan Berjalan)
     let selectedBudgetYear = initDate.getFullYear();
@@ -513,7 +532,6 @@
     const namaBulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
     document.addEventListener("DOMContentLoaded", () => {
-      // Tampilkan tanggal hari ini secara otomatis di Header menggantikan "Keuangan Pintar"
       const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
       const tanggalHariIni = new Date().toLocaleDateString('id-ID', options);
       document.getElementById("txtTanggalHeader").innerText = tanggalHariIni;
@@ -701,6 +719,29 @@
 
     window.pilihTanggalKalender = function(tanggalStr) {
       selectedTanggalFilter = selectedTanggalFilter === tanggalStr ? null : tanggalStr;
+      selectedStartDate = null;
+      selectedEndDate = null;
+      document.getElementById("filterStartDate").value = "";
+      document.getElementById("filterEndDate").value = "";
+      tutupModalKalender();
+      updateLabelTombolFilter();
+      renderRiwayatLengkap();
+    }
+
+    window.terapkanFilterRange = function() {
+      const start = document.getElementById("filterStartDate").value;
+      const end = document.getElementById("filterEndDate").value;
+      if(!start || !end) {
+        showToast("Pilih tanggal awal dan akhir!", "error");
+        return;
+      }
+      if(start > end) {
+        showToast("Tanggal awal tidak boleh lebih besar dari akhir!", "error");
+        return;
+      }
+      selectedStartDate = start;
+      selectedEndDate = end;
+      selectedTanggalFilter = null;
       tutupModalKalender();
       updateLabelTombolFilter();
       renderRiwayatLengkap();
@@ -708,6 +749,10 @@
 
     window.resetFilterTanggal = function() {
       selectedTanggalFilter = null;
+      selectedStartDate = null;
+      selectedEndDate = null;
+      document.getElementById("filterStartDate").value = "";
+      document.getElementById("filterEndDate").value = "";
       tutupModalKalender();
       updateLabelTombolFilter();
       renderRiwayatLengkap();
@@ -715,7 +760,11 @@
 
     function updateLabelTombolFilter() {
       const lbl = document.getElementById("labelTombolFilterTanggal");
-      if (selectedTanggalFilter) {
+      if (selectedStartDate && selectedEndDate) {
+        let p1 = selectedStartDate.split("-");
+        let p2 = selectedEndDate.split("-");
+        lbl.innerText = `${p1[2]}/${p1[1]} - ${p2[2]}/${p2[1]}`;
+      } else if (selectedTanggalFilter) {
         let parts = selectedTanggalFilter.split("-");
         lbl.innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
       } else {
@@ -731,6 +780,8 @@
 
       const firstDayIndex = (new Date(kalenderTahun, kalenderBulan, 1).getDay() + 6) % 7;
       const totalDays = new Date(kalenderTahun, kalenderBulan + 1, 0).getDate();
+
+      const todayStr = `${initDate.getFullYear()}-${String(initDate.getMonth() + 1).padStart(2, '0')}-${String(initDate.getDate()).padStart(2, '0')}`;
 
       for (let i = 0; i < firstDayIndex; i++) {
         grid.innerHTML += `<div></div>`;
@@ -751,9 +802,13 @@
         });
 
         const isSelected = selectedTanggalFilter === dateStr;
+        const isToday = dateStr === todayStr;
+
         let bgClass = "bg-slate-50 hover:bg-slate-100 text-slate-700";
         if (isSelected) {
           bgClass = "bg-[#009666] text-white font-bold shadow-sm";
+        } else if (isToday) {
+          bgClass = "border-2 border-[#009666] text-[#009666] font-bold bg-emerald-50/40";
         }
 
         let dotsHtml = `<div class="flex justify-center gap-0.5 mt-0.5 h-1">`;
@@ -927,7 +982,10 @@
          let matchJenis = (currentFilterJenis === "Semua") || (item.jenis === currentFilterJenis);
          let matchKeyword = item.kategori.toLowerCase().includes(keyword) || (item.keterangan && item.keterangan.toLowerCase().includes(keyword));
          let matchTanggal = true;
-         if (selectedTanggalFilter) {
+         
+         if (selectedStartDate && selectedEndDate) {
+            matchTanggal = item.tanggal >= selectedStartDate && item.tanggal <= selectedEndDate;
+         } else if (selectedTanggalFilter) {
             matchTanggal = item.tanggal === selectedTanggalFilter;
          } else {
             const mm = String(kalenderBulan + 1).padStart(2, '0');
@@ -948,7 +1006,7 @@
       document.getElementById("totalCountFilter").innerText = filtered.length + " Item";
 
       if(filtered.length === 0) {
-         container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Tidak ada transaksi pada periode/tanggal ini.</div>`;
+         container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl">Tidak ada transaksi pada periode/rentang tanggal ini.</div>`;
          return;
       }
 
